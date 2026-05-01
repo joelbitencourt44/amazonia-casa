@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Produtos naturais da Amazônia" />
+    <meta name="theme-color" content="#2d5a27" />
+    <title>Amazônia em Casa</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/pwa.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+  </head>
+  <body>
+    <div id="offlineIndicator" class="offline-indicator"></div>
+
+    <header class="header">
+      <nav class="nav-container">
+        <div class="logo">
+          <span style="font-size: 2rem">🌿</span>
+          <h1>Amazônia em Casa</h1>
+        </div>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="#home" class="active">Início</a></li>
+          <li><a href="#products">Produtos</a></li>
+          <li><a href="#about">Sobre</a></li>
+          <li><a href="#tracking">Rastreabilidade</a></li>
+          <li><a href="#impact">Impacto</a></li>
+          <li><a href="#contact">Contato</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a href="cadastro.html" class="btn-login" id="btnUserArea"
+            >👤 Entrar</a
+          >
+          <button class="cart-btn" id="cartBtn">
+            🛒 <span id="cartCount">0</span>
+          </button>
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="app">
+      <section id="home" class="section home-section">
+        <div class="hero">
+          <div class="hero-content">
+            <h2>Direto da Floresta para Sua Casa</h2>
+            <p>Produtos naturais da Amazônia com rastreabilidade completa.</p>
+            <div class="hero-cta">
+              <a href="#products" class="btn btn-primary">Ver Produtos</a>
+              <a href="#impact" class="btn btn-secondary">Nosso Impacto</a>
+            </div>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-card">
+              <span class="stat-number">+500</span
+              ><span class="stat-label">Clientes</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">50</span
+              ><span class="stat-label">Famílias Apoiadas</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">100%</span
+              ><span class="stat-label">Natural</span>
+            </div>
+          </div>
+        </div>
+        <div
+          id="couponBanner"
+          class="coupon-banner"
+          style="display: none"
+        ></div>
+        <div class="featured-section">
+          <h3>Produtos em Destaque</h3>
+          <div class="products-grid" id="featuredProducts"></div>
+        </div>
+      </section>
+
+      <section
+        id="products"
+        class="section products-section"
+        style="display: none"
+      >
+        <h2>Nossos Produtos</h2>
+        <div class="filters">
+          <div class="search-box">
+            <input
+              type="text"
+              id="searchProduct"
+              placeholder="Buscar produto..."
+            />
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="category-filters">
+            <button class="filter-btn active" data-category="all">Todos</button>
+            <button class="filter-btn" data-category="mel">Mel</button>
+            <button class="filter-btn" data-category="oleos">Óleos</button>
+            <button class="filter-btn" data-category="suplementos">
+              Suplementos
+            </button>
+          </div>
+        </div>
+        <div class="products-grid-full" id="allProducts"></div>
+      </section>
+
+      <section id="about" class="section about-section" style="display: none">
+        <h2>Nossa História</h2>
+        <div id="aboutContent"></div>
+      </section>
+
+      <section
+        id="tracking"
+        class="section tracking-section"
+        style="display: none"
+      >
+        <h2>Rastreabilidade da Floresta</h2>
+        <div class="tracking-demo">
+          <div class="qr-demo">
+            <div class="qr-code" id="qrCodeDisplay">
+              <div
+                style="
+                  width: 200px;
+                  height: 200px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 3rem;
+                "
+              >
+                🌿
+              </div>
+            </div>
+            <button class="btn btn-secondary" id="simulateScan">
+              Simular Leitura
+            </button>
+          </div>
+          <div class="tracking-info" id="trackingInfo" style="display: none">
+            <h3 id="trackingProduct">Produto</h3>
+            <div class="origin-details">
+              <p>
+                <strong>📍 Origem:</strong> <span id="trackingOrigin">-</span>
+              </p>
+              <p>
+                <strong>👤 Extrativista:</strong>
+                <span id="trackingProducer">-</span>
+              </p>
+              <p><strong>📅 Data:</strong> <span id="trackingDate">-</span></p>
+              <p><strong>🌳 Área:</strong> <span id="trackingArea">-</span></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="impact" class="section impact-section" style="display: none">
+        <h2>Calculadora de Impacto</h2>
+        <div class="impact-calculator">
+          <div class="calculator-input">
+            <label>Simule sua compra (R$):</label>
+            <input
+              type="range"
+              id="impactValue"
+              min="50"
+              max="500"
+              value="150"
+              step="10"
+            />
+            <span id="impactDisplay">R$ 150,00</span>
+          </div>
+          <div class="impact-results">
+            <div class="impact-card">
+              <span style="font-size: 2.5rem">🌳</span>
+              <h4>Floresta</h4>
+              <p><span id="treesPreserved">3</span> m²</p>
+            </div>
+            <div class="impact-card">
+              <span style="font-size: 2.5rem">👨‍👩‍👧‍👦</span>
+              <h4>Famílias</h4>
+              <p><span id="familiesHelped">2</span></p>
+            </div>
+            <div class="impact-card">
+              <span style="font-size: 2.5rem">🐝</span>
+              <h4>Abelhas</h4>
+              <p><span id="beesSaved">1.500</span></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="contact"
+        class="section contact-section"
+        style="display: none"
+      >
+        <h2>Fale Conosco</h2>
+        <div class="contact-container">
+          <div class="contact-info" id="contactInfo">
+            <h3>Amazônia em Casa</h3>
+            <p><i class="fas fa-map-marker-alt"></i> Endereço aqui</p>
+            <p><i class="fas fa-phone"></i> (91) 00000-0000</p>
+            <p><i class="fas fa-clock"></i> Horário aqui</p>
+            <div class="social-links">
+              <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+              <a href="#" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            </div>
+          </div>
+          <form class="contact-form" id="contactForm">
+            <input type="text" placeholder="Seu nome" required />
+            <input type="email" placeholder="Seu e-mail" required />
+            <textarea placeholder="Sua mensagem" rows="5" required></textarea>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Amazônia em Casa</h4>
+          <p>Riquezas da floresta.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Links</h4>
+          <ul>
+            <li><a href="#products">Produtos</a></li>
+            <li><a href="#tracking">Rastreabilidade</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Pagamento</h4>
+          <div class="payment-methods">
+            <span>💳 Cartão</span><span>📱 Pix</span><span>🔗 Boleto</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2026</p></div>
+    </footer>
+
+    <!-- Carrinho -->
+    <div class="cart-sidebar" id="cartSidebar">
+      <div class="cart-header">
+        <h3>🛒 Carrinho</h3>
+        <button id="cartClose">&times;</button>
+      </div>
+      <div class="cart-items" id="cartItems">
+        <p class="empty-cart">Carrinho vazio 🌿</p>
+      </div>
+      <div
+        class="cart-coupon"
+        id="cartCouponArea"
+        style="display: none; padding: 0 1.5rem"
+      >
+        <div class="coupon-input-group">
+          <input type="text" id="couponCode" placeholder="Código do cupom" />
+          <button class="btn btn-secondary btn-sm" id="applyCouponBtn">
+            Aplicar
+          </button>
+        </div>
+        <p id="couponMessage" style="font-size: 0.8rem; margin-top: 0.3rem"></p>
+      </div>
+      <div class="cart-footer" id="cartFooter" style="display: none">
+        <div class="cart-total">
+          <span>Subtotal:</span><span id="cartSubtotal">R$ 0,00</span>
+        </div>
+        <div
+          class="cart-total"
+          id="cartDiscountRow"
+          style="display: none; color: #2d5a27"
+        >
+          <span>Desconto:</span><span id="cartDiscount">-R$ 0,00</span>
+        </div>
+        <div class="cart-total">
+          <span>Total:</span><span id="cartTotal">R$ 0,00</span>
+        </div>
+        <div class="checkout-options">
+          <button class="btn btn-primary" id="checkoutSiteBtn">
+            💳 Finalizar no Site
+          </button>
+          <button class="btn-whatsapp" id="checkoutWhatsappBtn">
+            💬 Finalizar pelo WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- Modal Checkout -->
+    <div id="checkoutModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" id="closeCheckoutModal">&times;</span>
+        <h2>Finalizar Pedido</h2>
+        <div
+          id="checkoutSummary"
+          style="
+            background: #f4f1ea;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+          "
+        ></div>
+        <div class="form-group">
+          <label>Endereço *</label
+          ><input type="text" id="checkoutAddress" class="form-input" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+          <div class="form-group">
+            <label>Cidade *</label
+            ><input
+              type="text"
+              id="checkoutCity"
+              class="form-input"
+              value="Belém"
+            />
+          </div>
+          <div class="form-group">
+            <label>CEP</label
+            ><input type="text" id="checkoutCep" class="form-input" />
+          </div>
+        </div>
+        <h3 style="margin-top: 1rem">Pagamento</h3>
+        <div class="payment-options">
+          <label class="payment-option"
+            ><input type="radio" name="payment" value="pix" checked /><span
+              class="payment-label"
+              >📱 Pix</span
+            ><span class="payment-discount">5% OFF</span></label
+          >
+          <label class="payment-option"
+            ><input type="radio" name="payment" value="credit" /><span
+              class="payment-label"
+              >💳 Crédito</span
+            ></label
+          >
+          <label class="payment-option"
+            ><input type="radio" name="payment" value="debit" /><span
+              class="payment-label"
+              >🏦 Débito</span
+            ></label
+          >
+          <label class="payment-option"
+            ><input type="radio" name="payment" value="boleto" /><span
+              class="payment-label"
+              >🔗 Boleto</span
+            ></label
+          >
+        </div>
+        <button
+          class="btn btn-primary"
+          id="confirmOrderBtn"
+          style="
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+          "
+        >
+          ✅ Confirmar Pedido
+        </button>
+      </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-container">
+      <button class="chatbot-toggle" id="chatbotToggle">💬</button>
+      <div class="chatbot-window" id="chatbotWindow" style="display: none">
+        <div class="chatbot-header">
+          <h4>🌿 Assistente</h4>
+          <button id="chatbotClose" class="chatbot-close">&times;</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+          <div class="message bot"><p>Olá! Como posso ajudar? 🌿</p></div>
+        </div>
+        <div class="chatbot-input">
+          <input type="text" id="chatbotInput" placeholder="Digite..." /><button
+            id="chatbotSend"
+          >
+            ➤
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/tracker.js"></script>
+    <script src="js/freight.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("sw.js");
+        });
+      }
+    </script>
+  </body>
+</html>

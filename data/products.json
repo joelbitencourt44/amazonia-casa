@@ -1,0 +1,32 @@
+{
+  "products": [],
+  "site_config": {
+    "store_name": "Minha Loja",
+    "phone": "(91) 00000-0000",
+    "whatsapp": "5591000000000",
+    "email": "contato@minhaloja.com.br",
+    "address": "Seu endereço completo, Belém - PA",
+    "business_hours": "Seg-Sex: 9h às 18h | Sáb: 9h às 13h",
+    "payment_methods": ["Cartão de Crédito", "Pix", "Boleto"],
+    "pix_discount": 5,
+    "installments": 3,
+    "free_shipping_from": 100,
+    "social": {
+      "instagram": "https://instagram.com/",
+      "facebook": "https://facebook.com/",
+      "youtube": ""
+    },
+    "hero": {
+      "title": "Direto da Floresta para Sua Casa",
+      "subtitle": "Produtos naturais da Amazônia com rastreabilidade completa."
+    },
+    "about": {
+      "title": "Nossa História",
+      "content": "Conte aqui a história da sua loja.",
+      "mission": "Nossa missão.",
+      "founder": "Seu nome",
+      "founded": "2026"
+    }
+  },
+  "orders": []
+}

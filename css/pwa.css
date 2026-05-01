@@ -1,0 +1,50 @@
+.install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #2d5a27;
+  color: white;
+  z-index: 9999;
+  padding: 1rem;
+  text-align: center;
+}
+
+.install-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-install {
+  background: white;
+  color: #2d5a27;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.offline-indicator {
+  background: #ff6b6b;
+  color: white;
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  display: none;
+}
+
+.offline-indicator.show {
+  display: block;
+}
