@@ -33,6 +33,9 @@
         <a href="#coupons" class="nav-item" data-section="coupons"
           ><i class="fas fa-ticket-alt"></i> Cupons</a
         >
+        <a href="#deliveries" class="nav-item" data-section="deliveries"
+          ><i class="fas fa-motorcycle"></i> Entregas</a
+        >
         <a href="#content" class="nav-item" data-section="content"
           ><i class="fas fa-edit"></i> Conteúdo</a
         >
@@ -516,6 +519,150 @@
               type="button"
               class="btn btn-secondary"
               onclick="closeProductModal()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Entregas -->
+    <section id="deliveries" class="admin-section">
+      <h2>🚚 Gerenciar Entregas</h2>
+
+      <!-- Cards de status -->
+      <div class="metrics-grid" style="margin-bottom: 2rem">
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #fff3e0">
+            <span style="color: #e65100">📦</span>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Aguardando Entrega</span>
+            <span class="metric-value" id="awaitingDelivery">0</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #e3f2fd">
+            <span style="color: #1565c0">🚚</span>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Em Andamento</span>
+            <span class="metric-value" id="inTransit">0</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #e8f5e9">
+            <span style="color: #2d5a27">✅</span>
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Entregues Hoje</span>
+            <span class="metric-value" id="deliveredToday">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtro -->
+      <select
+        id="deliveryStatusFilter"
+        onchange="loadDeliveriesTable()"
+        style="
+          margin-bottom: 1rem;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          border: 1px solid #ddd;
+        "
+      >
+        <option value="all">Todas as entregas</option>
+        <option value="pending">⏳ Pendentes</option>
+        <option value="confirmed">✅ Confirmados</option>
+        <option value="shipped">🚚 Em entrega</option>
+        <option value="delivered">📦 Entregues</option>
+      </select>
+
+      <!-- Tabela de entregas -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Pedido #</th>
+              <th>Cliente</th>
+              <th>Endereço</th>
+              <th>Status</th>
+              <th>Cód. Rastreio</th>
+              <th>Mapa</th>
+              <th>Ações</th>
+              <th>Cancelar</th>
+            </tr>
+          </thead>
+          <tbody id="deliveriesTable">
+            <tr>
+              <td colspan="8" style="text-align: center; color: #999">
+                Nenhuma entrega encontrada
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Área do mapa (simulada) -->
+      <div class="dashboard-section" style="margin-top: 2rem">
+        <h3>🗺️ Mapa de Entregas Ativas</h3>
+        <div
+          id="deliveryMap"
+          style="width: 100%; height: 400px; border-radius: 12px"
+        ></div>
+      </div>
+    </section>
+
+    <!-- Modal de Rastreio -->
+    <div id="trackingModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeTrackingModal()">&times;</span>
+        <h2>📦 Atualizar Rastreamento</h2>
+        <form id="trackingForm">
+          <input type="hidden" id="trackingOrderId" />
+          <div class="form-group">
+            <label>Código de Rastreio</label>
+            <input
+              type="text"
+              id="trackingCode"
+              class="form-input"
+              placeholder="Ex: BR123456789"
+            />
+          </div>
+
+          <!-- 
+            ⚠️ API DE ENTREGA - CONFIGURAÇÃO
+            ============================================
+            Quando tiver a API, esses campos serão
+            preenchidos automaticamente. Por enquanto,
+            você pode inserir manualmente.
+            ============================================
+            -->
+          <div class="form-group">
+            <label>Link de Rastreamento</label>
+            <input
+              type="url"
+              id="trackingLink"
+              class="form-input"
+              placeholder="https://rastreio.exemplo.com/BR123456789"
+            />
+          </div>
+          <div class="form-group">
+            <label>Status da Entrega</label>
+            <select id="trackingStatus" class="form-input">
+              <option value="shipped">🚚 Em Entrega</option>
+              <option value="delivered">📦 Entregue</option>
+              <option value="cancelled">❌ Cancelado</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeTrackingModal()"
             >
               Cancelar
             </button>

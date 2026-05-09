@@ -292,77 +292,488 @@
     <div class="cart-overlay" id="cartOverlay"></div>
 
     <!-- Modal Checkout -->
+    <!-- Modal Checkout -->
     <div id="checkoutModal" class="modal">
-      <div class="modal-content">
+      <div class="modal-content modal-checkout">
         <span class="close-modal" id="closeCheckoutModal">&times;</span>
-        <h2>Finalizar Pedido</h2>
-        <div
-          id="checkoutSummary"
-          style="
-            background: #f4f1ea;
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-          "
-        ></div>
-        <div class="form-group">
-          <label>Endereço *</label
-          ><input type="text" id="checkoutAddress" class="form-input" />
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+        <h2>💳 Finalizar Pedido</h2>
+
+        <div class="checkout-steps">
+          <!-- Resumo -->
+          <div
+            id="checkoutSummary"
+            style="
+              background: #f4f1ea;
+              padding: 1rem;
+              border-radius: 10px;
+              margin-bottom: 1.5rem;
+            "
+          ></div>
+
+          <!-- Endereço -->
+          <h4>📍 Endereço de Entrega</h4>
           <div class="form-group">
-            <label>Cidade *</label
-            ><input
+            <label>Endereço *</label>
+            <input
               type="text"
-              id="checkoutCity"
+              id="checkoutAddress"
               class="form-input"
-              value="Belém"
+              placeholder="Rua, número, bairro"
             />
           </div>
-          <div class="form-group">
-            <label>CEP</label
-            ><input type="text" id="checkoutCep" class="form-input" />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+            <div class="form-group">
+              <label>Cidade *</label>
+              <input
+                type="text"
+                id="checkoutCity"
+                class="form-input"
+                value="Belém"
+              />
+            </div>
+            <div class="form-group">
+              <label>CEP</label>
+              <input
+                type="text"
+                id="checkoutCep"
+                class="form-input"
+                placeholder="66000-000"
+              />
+            </div>
           </div>
+
+          <!-- Frete -->
+          <!-- Frete -->
+          <h4 style="margin-top: 1.5rem">🚚 Tipo de Entrega</h4>
+          <div class="shipping-options">
+            <label class="payment-option">
+              <input
+                type="radio"
+                name="shipping"
+                value="same_day"
+                checked
+                onchange="updateCheckoutTotal()"
+              />
+              <span class="payment-label">🛵 Entrega Rápida</span>
+              <span class="payment-discount" id="expressCost"
+                >Calculando...</span
+              >
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="shipping" value="normal" />
+              <span class="payment-label">📦 Entrega Normal</span>
+              <span class="payment-discount" id="normalCost"
+                >Calculando...</span
+              >
+            </label>
+            <label class="payment-option">
+              <input
+                type="radio"
+                name="shipping"
+                value="pickup"
+                onchange="updateCheckoutTotal()"
+              />
+              <span class="payment-label">🏪 Retirar na Loja</span>
+              <span
+                class="payment-discount"
+                style="background: #e8f5e9; color: #2d5a27"
+                >Grátis</span
+              >
+            </label>
+          </div>
+          <div
+            id="shippingDetails"
+            style="
+              background: #f9f9f9;
+              padding: 0.8rem;
+              border-radius: 10px;
+              font-size: 0.9rem;
+              margin-top: 0.5rem;
+            "
+          >
+            <p>📍 <strong>Belém e região metropolitana</strong></p>
+            <p style="color: #999">
+              Frete calculado pelo aplicativo de entrega
+            </p>
+            <p id="shippingMessage" style="color: #e65100; font-size: 0.85rem">
+              ⏳ Calculando valor do frete...
+            </p>
+          </div>
+
+          <!-- Forma de Pagamento -->
+          <h4 style="margin-top: 1.5rem">💳 Forma de Pagamento</h4>
+
+          <!-- Tabs de pagamento -->
+          <div class="payment-tabs">
+            <button class="payment-tab active" onclick="showPaymentTab('pix')">
+              📱 Pix
+            </button>
+            <button class="payment-tab" onclick="showPaymentTab('credit')">
+              💳 Crédito
+            </button>
+            <button class="payment-tab" onclick="showPaymentTab('debit')">
+              🏦 Débito
+            </button>
+            <button class="payment-tab" onclick="showPaymentTab('boleto')">
+              🔗 Boleto
+            </button>
+            <button class="payment-tab" onclick="showPaymentTab('combined')">
+              🔄 Combinar
+            </button>
+            <button class="payment-tab" onclick="showPaymentTab('twocards')">
+              💳💳 2 Cartões
+            </button>
+          </div>
+
+          <!-- Painel Pix -->
+          <div id="paymentPanel_pix" class="payment-panel active">
+            <div class="payment-info-box">
+              <p><strong>📱 Pagamento via Pix</strong></p>
+              <p style="color: #2d5a27">
+                ✅ <strong>5% de desconto</strong> no Pix
+              </p>
+              <p style="color: #999; font-size: 0.85rem">
+                Pagamento instantâneo, aprovado na hora.
+              </p>
+            </div>
+          </div>
+
+          <!-- Painel Crédito -->
+          <div id="paymentPanel_credit" class="payment-panel">
+            <div class="form-group">
+              <label>Número do Cartão</label>
+              <input
+                type="text"
+                class="form-input card-input"
+                placeholder="0000 0000 0000 0000"
+                maxlength="19"
+                oninput="
+                  this.value = PaymentSystem.formatCardNumber(this.value)
+                "
+              />
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 1rem;
+              "
+            >
+              <div class="form-group">
+                <label>Validade</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="MM/AA"
+                  maxlength="5"
+                  oninput="this.value = PaymentSystem.formatExpiry(this.value)"
+                />
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="123"
+                  maxlength="4"
+                  oninput="this.value = PaymentSystem.formatCVV(this.value)"
+                  type="password"
+                />
+              </div>
+              <div class="form-group">
+                <label>Parcelas</label>
+                <select class="form-input" id="creditInstallments">
+                  <option value="1">1x sem juros</option>
+                  <option value="2">2x sem juros</option>
+                  <option value="3">3x sem juros</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nome no Cartão</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Como está no cartão"
+              />
+            </div>
+            <div class="form-group">
+              <label>CPF do Titular</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="000.000.000-00"
+              />
+            </div>
+          </div>
+
+          <!-- Painel Débito -->
+          <div id="paymentPanel_debit" class="payment-panel">
+            <div class="form-group">
+              <label>Número do Cartão</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="0000 0000 0000 0000"
+                maxlength="19"
+                oninput="
+                  this.value = PaymentSystem.formatCardNumber(this.value)
+                "
+              />
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
+            >
+              <div class="form-group">
+                <label>Validade</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="MM/AA"
+                  maxlength="5"
+                  oninput="this.value = PaymentSystem.formatExpiry(this.value)"
+                />
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="123"
+                  maxlength="4"
+                  type="password"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nome no Cartão</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Como está no cartão"
+              />
+            </div>
+          </div>
+
+          <!-- Painel Boleto -->
+          <div id="paymentPanel_boleto" class="payment-panel">
+            <div class="payment-info-box">
+              <p><strong>🔗 Boleto Bancário</strong></p>
+              <p style="color: #999; font-size: 0.85rem">
+                Vencimento em 3 dias úteis. O pedido é processado após
+                confirmação do pagamento.
+              </p>
+            </div>
+          </div>
+
+          <!-- Painel Combinado (Pix + Cartão) -->
+          <div id="paymentPanel_combined" class="payment-panel">
+            <p style="margin-bottom: 1rem">
+              💡 Divida o pagamento entre
+              <strong>Pix e Cartão de Crédito</strong>
+            </p>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
+            >
+              <div class="form-group">
+                <label>Valor no Pix</label>
+                <input
+                  type="number"
+                  class="form-input"
+                  id="combinedPixAmount"
+                  placeholder="R$ 0,00"
+                  step="0.01"
+                  oninput="updateCombinedTotal()"
+                />
+              </div>
+              <div class="form-group">
+                <label>Valor no Cartão</label>
+                <input
+                  type="number"
+                  class="form-input"
+                  id="combinedCardAmount"
+                  placeholder="R$ 0,00"
+                  step="0.01"
+                  oninput="updateCombinedTotal()"
+                  readonly
+                  style="background: #f5f5f5"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Número do Cartão</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="0000 0000 0000 0000"
+                maxlength="19"
+                oninput="
+                  this.value = PaymentSystem.formatCardNumber(this.value)
+                "
+              />
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 1rem;
+              "
+            >
+              <div class="form-group">
+                <label>Validade</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="MM/AA"
+                  maxlength="5"
+                />
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="123"
+                  maxlength="4"
+                />
+              </div>
+              <div class="form-group">
+                <label>Parcelas</label>
+                <select class="form-input">
+                  <option value="1">1x</option>
+                  <option value="2">2x</option>
+                  <option value="3">3x</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nome no Cartão</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Como está no cartão"
+              />
+            </div>
+          </div>
+
+          <!-- Painel 2 Cartões -->
+          <div id="paymentPanel_twocards" class="payment-panel">
+            <p style="margin-bottom: 1rem">
+              💡 Divida o pagamento entre
+              <strong>dois cartões de crédito</strong>
+            </p>
+
+            <h5 style="color: #2d5a27; margin-bottom: 0.5rem">💳 Cartão 1</h5>
+            <div class="form-group">
+              <label>Valor no Cartão 1</label>
+              <input
+                type="number"
+                class="form-input"
+                id="card1Amount"
+                placeholder="R$ 0,00"
+                step="0.01"
+                oninput="updateTwoCardsTotal()"
+              />
+            </div>
+            <div class="form-group">
+              <label>Número do Cartão</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="0000 0000 0000 0000"
+                maxlength="19"
+                oninput="
+                  this.value = PaymentSystem.formatCardNumber(this.value)
+                "
+              />
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
+            >
+              <div class="form-group">
+                <label>Validade</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="MM/AA"
+                  maxlength="5"
+                />
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="123"
+                  maxlength="4"
+                />
+              </div>
+            </div>
+
+            <h5 style="color: #2d5a27; margin: 1rem 0 0.5rem">💳 Cartão 2</h5>
+            <div class="form-group">
+              <label>Valor no Cartão 2</label>
+              <input
+                type="number"
+                class="form-input"
+                id="card2Amount"
+                placeholder="R$ 0,00"
+                step="0.01"
+                oninput="updateTwoCardsTotal()"
+                readonly
+                style="background: #f5f5f5"
+              />
+            </div>
+            <div class="form-group">
+              <label>Número do Cartão</label>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="0000 0000 0000 0000"
+                maxlength="19"
+                oninput="
+                  this.value = PaymentSystem.formatCardNumber(this.value)
+                "
+              />
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
+            >
+              <div class="form-group">
+                <label>Validade</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="MM/AA"
+                  maxlength="5"
+                />
+              </div>
+              <div class="form-group">
+                <label>CVV</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  placeholder="123"
+                  maxlength="4"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Botão Confirmar -->
+          <button
+            class="btn btn-primary btn-block"
+            id="confirmOrderBtn"
+            style="
+              width: 100%;
+              padding: 1rem;
+              margin-top: 1.5rem;
+              font-size: 1.2rem;
+            "
+          >
+            ✅ Confirmar Pedido
+          </button>
         </div>
-        <h3 style="margin-top: 1rem">Pagamento</h3>
-        <div class="payment-options">
-          <label class="payment-option"
-            ><input type="radio" name="payment" value="pix" checked /><span
-              class="payment-label"
-              >📱 Pix</span
-            ><span class="payment-discount">5% OFF</span></label
-          >
-          <label class="payment-option"
-            ><input type="radio" name="payment" value="credit" /><span
-              class="payment-label"
-              >💳 Crédito</span
-            ></label
-          >
-          <label class="payment-option"
-            ><input type="radio" name="payment" value="debit" /><span
-              class="payment-label"
-              >🏦 Débito</span
-            ></label
-          >
-          <label class="payment-option"
-            ><input type="radio" name="payment" value="boleto" /><span
-              class="payment-label"
-              >🔗 Boleto</span
-            ></label
-          >
-        </div>
-        <button
-          class="btn btn-primary"
-          id="confirmOrderBtn"
-          style="
-            width: 100%;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-size: 1.1rem;
-          "
-        >
-          ✅ Confirmar Pedido
-        </button>
       </div>
     </div>
 
@@ -392,6 +803,7 @@
     <script src="js/chatbot.js"></script>
     <script src="js/tracker.js"></script>
     <script src="js/freight.js"></script>
+    <script src="js/payment.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {

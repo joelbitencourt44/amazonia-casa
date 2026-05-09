@@ -386,3 +386,15 @@ td {
   border: 2px solid var(--light-gray);
   object-fit: cover;
 }
+/* Estilos para entregas */
+#deliveryMap {
+  transition: all 0.3s ease;
+}
+
+#deliveryMap:hover {
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-sm.btn-edit {
+  margin-right: 0.3rem;
+}

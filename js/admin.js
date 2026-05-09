@@ -439,26 +439,32 @@ function loadCustomersTable() {
 }
 
 function loadCouponsTable() {
-  const tbody = document.getElementById("couponsTable");
-  if (coupons.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="6" style="text-align:center;">Nenhum cupom.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = coupons
-    .map(
-      (c) => `
-        <tr>
-            <td><strong>${c.code}</strong></td><td>${c.discount}%</td><td>${c.assignedTo === "all" ? "Todos" : c.assignedTo}</td>
-            <td>${new Date(c.expiresAt).toLocaleDateString("pt-BR")}</td>
-            <td><span class="status-badge ${c.used || new Date(c.expiresAt) < new Date() ? "inactive" : "active"}">${c.used ? "Usado" : new Date(c.expiresAt) < new Date() ? "Expirado" : "Ativo"}</span></td>
-            <td><button class="btn-sm btn-delete" onclick="deleteCoupon('${c.code}')">🗑️</button></td>
-        </tr>
-    `,
-    )
-    .join("");
-}
+    const tbody = document.getElementById('couponsTable');
+    if (!tbody) return;
 
+    if (coupons.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum cupom.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = coupons.map(c => {
+        const isUsed = c.usedBy && c.usedBy.length > 0;
+        const isExpired = new Date(c.expiresAt) < new Date();
+        const statusClass = (isUsed || isExpired) ? 'inactive' : 'active';
+        const statusText = isUsed ? 'Usado' : (isExpired ? 'Expirado' : 'Ativo');
+
+        return `
+            <tr>
+                <td><strong>${c.code}</strong></td>
+                <td>${c.discount}%</td>
+                <td>${c.assignedTo === 'all' ? 'Todos' : c.assignedTo}</td>
+                <td>${new Date(c.expiresAt).toLocaleDateString('pt-BR')}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td><button class="btn-sm btn-delete" onclick="deleteCoupon('${c.code}')">🗑️</button></td>
+            </tr>
+        `;
+    }).join('');
+}
 function openCouponModal() {
   document.getElementById("couponModal").style.display = "flex";
   document.getElementById("couponForm").reset();
@@ -487,14 +493,25 @@ function deleteCoupon(code) {
 }
 
 function saveCoupon() {
+  const code = document.getElementById("couponCode").value.toUpperCase();
+  const discount = parseInt(document.getElementById("couponDiscount").value);
+  const assignedTo = document.getElementById("couponAssignedTo").value;
+  const expiresAt = document.getElementById("couponExpiresAt").value;
+
+  if (!code || !discount || !expiresAt) {
+    alert("Preencha todos os campos obrigatórios!");
+    return;
+  }
+
   coupons.push({
-    code: document.getElementById("couponCode").value.toUpperCase(),
-    discount: parseInt(document.getElementById("couponDiscount").value),
-    assignedTo: document.getElementById("couponAssignedTo").value,
-    expiresAt: document.getElementById("couponExpiresAt").value,
-    used: false,
+    code,
+    discount,
+    assignedTo,
+    expiresAt,
+    usedBy: [], // ← lista de e-mails que já usaram
     createdAt: new Date().toISOString(),
   });
+
   saveAll();
   loadCouponsTable();
   closeCouponModal();
@@ -650,4 +667,398 @@ function loadCustomersTable() {
         `;
     })
     .join("");
+}
+
+// ============================================
+// SISTEMA DE ENTREGAS
+// ============================================
+
+/* ============================================
+   API DE ENTREGA - CONFIGURAÇÃO
+   ============================================
+   Substitua quando receber as credenciais:
+   
+   API_PROVIDER: 'ifood', 'loggi', 'uber', '99', 'custom'
+   API_KEY: sua chave secreta
+   API_URL: endpoint da API
+   ============================================ */
+const DELIVERY_API = {
+  provider: "custom", // ⚠️ MUDAR AQUI
+  apiKey: "SUA_CHAVE_API_AQUI", // ⚠️ MUDAR AQUI
+  apiUrl: "https://api.exemplo.com/v1/", // ⚠️ MUDAR AQUI
+  mapProvider: "google", // ⚠️ MUDAR: 'google', 'mapbox', 'leaflet'
+  mapApiKey: "AIzaSyA_cW-oB9st9HFhWLPxbRG8rMvUTDNkVCU", // ⚠️ MUDAR AQUI
+};
+
+// Carregar tabela de entregas
+function loadDeliveriesTable() {
+  const tbody = document.getElementById("deliveriesTable");
+  const filter =
+    document.getElementById("deliveryStatusFilter")?.value || "all";
+
+  if (!tbody) return;
+
+  let filteredOrders = [...orders];
+
+  if (filter !== "all") {
+    filteredOrders = filteredOrders.filter((o) => o.status === filter);
+  }
+
+  filteredOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (filteredOrders.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="8" style="text-align:center;color:#999;">Nenhuma entrega encontrada</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filteredOrders
+    .map((order) => {
+      const trackingCode = order.trackingCode || "-";
+      const trackingLink = order.trackingLink || "";
+      const canCancel =
+        order.status === "pending" || order.status === "confirmed";
+
+      return `
+            <tr>
+                <td><strong>#${order.id}</strong></td>
+                <td>${order.customer?.name || "N/A"}<br><small>${order.customer?.phone || ""}</small></td>
+                <td>${order.shipping?.address || "N/A"}<br><small>${order.shipping?.city || ""}</small></td>
+                <td><span class="status-badge ${getDeliveryStatusClass(order.status)}">${getDeliveryStatusName(order.status)}</span></td>
+                <td>
+                    ${
+                      trackingCode !== "-"
+                        ? `<span style="background:#2d5a27;color:white;padding:0.2rem 0.5rem;border-radius:5px;font-family:monospace;">${trackingCode}</span>`
+                        : '<span style="color:#999;">-</span>'
+                    }
+                </td>
+                <td>
+                    ${
+                      trackingLink
+                        ? `<a href="${trackingLink}" target="_blank" style="background:#1565c0;color:white;padding:0.3rem 0.8rem;border-radius:15px;text-decoration:none;font-size:0.85rem;">📍 Ver Mapa</a>`
+                        : order.status === "shipped"
+                          ? '<span style="color:#e65100;">Aguardando...</span>'
+                          : '<span style="color:#999;">-</span>'
+                    }
+                </td>
+                <td>
+                    <button class="btn-sm btn-edit" onclick="openTrackingModal(${order.id})">📝 Rastreio</button>
+                    ${order.status === "confirmed" ? `<button class="btn-sm" style="background:#25D366;color:white;border:none;cursor:pointer;margin-top:0.3rem;" onclick="callDeliveryAPI(${order.id})">🚀 Chamar Entregador</button>` : ""}
+                </td>
+                <td>
+                    ${
+                      canCancel
+                        ? `<button class="btn-sm btn-delete" onclick="cancelOrderAdmin(${order.id})" title="Cancelar pedido">❌ Cancelar</button>`
+                        : order.status === "cancelled"
+                          ? '<span style="color:#c62828;font-size:0.85rem;">Cancelado</span>'
+                          : '<span style="color:#999;font-size:0.8rem;">Não pode<br>cancelar</span>'
+                    }
+                </td>
+            </tr>
+        `;
+    })
+    .join("");
+
+  updateDeliveryMetrics();
+}
+
+function updateDeliveryMetrics() {
+  const today = new Date().toDateString();
+
+  document.getElementById("awaitingDelivery").textContent = orders.filter(
+    (o) => o.status === "confirmed",
+  ).length;
+  document.getElementById("inTransit").textContent = orders.filter(
+    (o) => o.status === "shipped",
+  ).length;
+  document.getElementById("deliveredToday").textContent = orders.filter(
+    (o) =>
+      o.status === "delivered" && new Date(o.date).toDateString() === today,
+  ).length;
+}
+
+function getDeliveryStatusName(status) {
+  const names = {
+    pending: "⏳ Pendente",
+    confirmed: "✅ Pronto para Envio",
+    shipped: "🚚 Em Entrega",
+    delivered: "📦 Entregue",
+    cancelled: "❌ Cancelado",
+  };
+  return names[status] || status;
+}
+
+function getDeliveryStatusClass(status) {
+  const classes = {
+    pending: "inactive",
+    confirmed: "inactive",
+    shipped: "active",
+    delivered: "active",
+    cancelled: "inactive",
+  };
+  return classes[status] || "";
+}
+
+// Modal de rastreio
+function openTrackingModal(orderId) {
+  const order = orders.find((o) => o.id === orderId);
+  if (!order) return;
+
+  document.getElementById("trackingOrderId").value = orderId;
+  document.getElementById("trackingCode").value = order.trackingCode || "";
+  document.getElementById("trackingLink").value = order.trackingLink || "";
+  document.getElementById("trackingStatus").value = order.status;
+
+  document.getElementById("trackingModal").style.display = "flex";
+}
+
+function closeTrackingModal() {
+  document.getElementById("trackingModal").style.display = "none";
+}
+
+// Salvar rastreamento
+document
+  .getElementById("trackingForm")
+  ?.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const orderId = parseInt(document.getElementById("trackingOrderId").value);
+    const trackingCode = document.getElementById("trackingCode").value;
+    const trackingLink = document.getElementById("trackingLink").value;
+    const newStatus = document.getElementById("trackingStatus").value;
+
+    const orderIndex = orders.findIndex((o) => o.id === orderId);
+    if (orderIndex >= 0) {
+      orders[orderIndex].trackingCode = trackingCode;
+      orders[orderIndex].trackingLink = trackingLink;
+      orders[orderIndex].status = newStatus;
+      orders[orderIndex].statusUpdatedAt = new Date().toISOString();
+
+      localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
+      loadDeliveriesTable();
+      loadOrdersTable();
+      loadDashboard();
+      closeTrackingModal();
+
+      alert("✅ Rastreamento atualizado com sucesso!");
+    }
+  });
+
+/* ============================================
+   FUNÇÃO QUE CHAMA A API DE ENTREGA
+   ============================================
+   Esta função será ativada quando você
+   tiver a chave da API.
+   
+   Por enquanto, apenas simula a chamada.
+   ============================================ */
+function callDeliveryAPI(orderId) {
+  const order = orders.find((o) => o.id === orderId);
+  if (!order) return;
+
+  /* 
+    ⚠️ QUANDO TIVER A API DO IFOOD/LOGGI:
+    Substitua o código abaixo por:
+    
+    fetch(DELIVERY_API.apiUrl + 'create-delivery', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + DELIVERY_API.apiKey,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            orderId: order.id,
+            pickupAddress: 'Av. Rômulo Maiorana, 1234 - Marco, Belém - PA',
+            deliveryAddress: order.shipping?.address,
+            customerName: order.customer?.name,
+            customerPhone: order.customer?.phone
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        order.trackingCode = data.trackingCode;
+        order.trackingLink = data.trackingUrl;
+        order.status = 'shipped';
+        localStorage.setItem('amazoniaOrders', JSON.stringify(orders));
+        loadDeliveriesTable();
+        alert('🚀 Entregador acionado! Código: ' + data.trackingCode);
+    })
+    .catch(error => {
+        alert('❌ Erro ao chamar entregador: ' + error.message);
+    });
+    */
+
+  // SIMULAÇÃO (remover quando tiver API real)
+  if (
+    confirm(
+      `🚀 Simular chamada de entregador para o pedido #${order.id}?\n\nCliente: ${order.customer?.name}\nEndereço: ${order.shipping?.address}\n\n(Na versão real, isso acionará a API do iFood/Loggi)`,
+    )
+  ) {
+    order.trackingCode = "SIM-" + Date.now().toString().slice(-8);
+    order.trackingLink = "https://rastreio.exemplo.com/" + order.trackingCode;
+    order.status = "shipped";
+    order.statusUpdatedAt = new Date().toISOString();
+
+    localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
+    loadDeliveriesTable();
+    loadOrdersTable();
+
+    alert(
+      `✅ Entregador simulado acionado!\n\nCódigo de rastreio: ${order.trackingCode}\n\nNa versão real, o entregador receberá o pedido automaticamente.`,
+    );
+  }
+}
+
+// Inicializar entregas
+function initDeliveries() {
+  loadDeliveriesTable();
+
+  // Fechar modal de rastreio ao clicar fora
+  window.addEventListener("click", (e) => {
+    if (e.target === document.getElementById("trackingModal")) {
+      closeTrackingModal();
+    }
+  });
+
+  // Evento do filtro
+  document
+    .getElementById("deliveryStatusFilter")
+    ?.addEventListener("change", loadDeliveriesTable);
+}
+
+// Adicionar à inicialização
+document.addEventListener("DOMContentLoaded", () => {
+  // ... (código existente)
+  initDeliveries();
+});
+// ============ CANCELAR PEDIDO (ADMIN) ============
+function cancelOrderAdmin(orderId) {
+  const order = orders.find((o) => o.id === orderId);
+  if (!order) return;
+
+  const motivo = prompt(
+    `❌ CANCELAR PEDIDO #${orderId}\n\n` +
+      `Cliente: ${order.customer?.name || "N/A"}\n` +
+      `Total: R$ ${(order.total || 0).toFixed(2)}\n\n` +
+      `Motivo do cancelamento:`,
+  );
+
+  if (motivo === null) return; // Clicou em Cancelar
+
+  if (
+    confirm(
+      `Confirma o cancelamento do pedido #${orderId}?\n\nMotivo: ${motivo}\n\nO cliente será notificado.`,
+    )
+  ) {
+    order.status = "cancelled";
+    order.cancelledAt = new Date().toISOString();
+    order.cancelledBy = "admin";
+    order.cancelledReason = motivo;
+
+    localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
+    loadDeliveriesTable();
+    loadOrdersTable();
+    loadDashboard();
+
+    alert("✅ Pedido #" + orderId + " cancelado com sucesso!");
+  }
+}
+
+// ============ CARREGAR MAPA ============
+function loadDeliveryMap() {
+  const mapDiv = document.getElementById("deliveryMap");
+  if (!mapDiv) return;
+
+  // Verificar se tem chave do mapa
+  const mapKey = DELIVERY_API.mapApiKey;
+
+  if (mapKey && mapKey !== "SUA_CHAVE_MAPA_AQUI") {
+    // Carregar Google Maps
+    if (!window.google) {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${mapKey}&callback=initDeliveryMap`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    } else {
+      initDeliveryMap();
+    }
+  } else {
+    // Mapa simples sem API (fallback)
+    mapDiv.innerHTML = `
+            <div style="width:100%;height:100%;background:#e8f5e9;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;">
+                <span style="font-size:4rem;">📍</span>
+                <p style="font-size:1.2rem;font-weight:bold;color:#2d5a27;">Amazônia em Casa</p>
+                <p style="color:#666;">Av. Rômulo Maiorana, 1234 - Marco, Belém - PA</p>
+                <p style="color:#999;font-size:0.9rem;">🗺️ Configure a chave do Google Maps para ver o mapa interativo</p>
+            </div>
+        `;
+  }
+}
+
+function initDeliveryMap() {
+  const mapDiv = document.getElementById("deliveryMap");
+  if (!mapDiv || !window.google) return;
+
+  // Coordenadas da loja (Av. Rômulo Maiorana, Belém)
+  const storeLocation = { lat: -1.455, lng: -48.4626 };
+
+  const map = new google.maps.Map(mapDiv, {
+    center: storeLocation,
+    zoom: 15,
+    styles: [
+      {
+        featureType: "poi.business",
+        stylers: [{ visibility: "off" }],
+      },
+    ],
+  });
+
+  // Marcador da loja
+  const marker = new google.maps.Marker({
+    position: storeLocation,
+    map: map,
+    title: "Amazônia em Casa",
+    animation: google.maps.Animation.DROP,
+    icon: {
+      url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="18" fill="%232d5a27"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18">🌿</text></svg>',
+      scaledSize: new google.maps.Size(40, 40),
+    },
+  });
+
+  // InfoWindow
+  const infoWindow = new google.maps.InfoWindow({
+    content: `
+            <div style="font-family:sans-serif;min-width:200px;">
+                <strong style="color:#2d5a27;">🌿 Amazônia em Casa</strong>
+                <p style="margin:5px 0;">Av. Rômulo Maiorana, 1234</p>
+                <p style="margin:5px 0;">Marco, Belém - PA</p>
+                <p style="margin:5px 0;color:#666;">📍 Ponto de retirada e entregas</p>
+            </div>
+        `,
+  });
+
+  marker.addListener("click", () => {
+    infoWindow.open(map, marker);
+  });
+
+  // Abrir infoWindow automaticamente
+  setTimeout(() => infoWindow.open(map, marker), 1000);
+}
+
+// Carregar mapa ao inicializar
+function initDeliveries() {
+  loadDeliveriesTable();
+  loadDeliveryMap();
+
+  // Fechar modal ao clicar fora
+  window.addEventListener("click", (e) => {
+    if (e.target === document.getElementById("trackingModal")) {
+      closeTrackingModal();
+    }
+  });
+
+  document
+    .getElementById("deliveryStatusFilter")
+    ?.addEventListener("change", loadDeliveriesTable);
 }

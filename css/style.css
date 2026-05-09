@@ -893,3 +893,77 @@ body {
     width: 300px;
   }
 }
+/* Opções de frete */
+.shipping-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem 0;
+}
+
+#shippingDetails {
+  border: 1px solid var(--light-gray);
+}
+
+#shippingDetails p {
+  margin-bottom: 0.3rem;
+}
+/* Payment Tabs */
+.payment-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.payment-tab {
+  padding: 0.5rem 0.8rem;
+  border: 2px solid var(--light-gray);
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.payment-tab:hover {
+  border-color: var(--primary);
+}
+
+.payment-tab.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.payment-panel {
+  display: none;
+  padding: 1rem 0;
+}
+
+.payment-panel.active {
+  display: block;
+}
+
+.payment-info-box {
+  background: #f0f7ee;
+  padding: 1rem;
+  border-radius: 10px;
+  border-left: 4px solid #2d5a27;
+}
+
+.modal-checkout {
+  max-width: 650px;
+  width: 95%;
+}
+
+.modal-checkout h4 {
+  color: var(--primary);
+  margin-bottom: 0.8rem;
+}
+
+.card-input {
+  font-family: monospace;
+  letter-spacing: 2px;
+}
