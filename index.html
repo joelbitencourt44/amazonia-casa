@@ -115,48 +115,21 @@
         <div id="aboutContent"></div>
       </section>
 
-      <section
-        id="tracking"
-        class="section tracking-section"
-        style="display: none"
-      >
-        <h2>Rastreabilidade da Floresta</h2>
-        <div class="tracking-demo">
-          <div class="qr-demo">
-            <div class="qr-code" id="qrCodeDisplay">
-              <div
-                style="
-                  width: 200px;
-                  height: 200px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  font-size: 3rem;
-                "
-              >
-                🌿
-              </div>
-            </div>
-            <button class="btn btn-secondary" id="simulateScan">
-              Simular Leitura
-            </button>
-          </div>
-          <div class="tracking-info" id="trackingInfo" style="display: none">
-            <h3 id="trackingProduct">Produto</h3>
-            <div class="origin-details">
-              <p>
-                <strong>📍 Origem:</strong> <span id="trackingOrigin">-</span>
-              </p>
-              <p>
-                <strong>👤 Extrativista:</strong>
-                <span id="trackingProducer">-</span>
-              </p>
-              <p><strong>📅 Data:</strong> <span id="trackingDate">-</span></p>
-              <p><strong>🌳 Área:</strong> <span id="trackingArea">-</span></p>
-            </div>
-          </div>
+      <section id="tracking" class="section tracking-section" style="display:none;">
+    <h2>🌿 Rastreabilidade dos Produtos</h2>
+    <p class="section-description">Clique em um produto para conhecer sua origem</p>
+    
+    <!-- Grid de produtos rastreáveis -->
+    <div class="products-grid" id="trackingProductsList"></div>
+    
+    <!-- Modal de detalhes -->
+    <div id="trackingDetailModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:5000; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:15px; padding:2rem; max-width:600px; width:95%; max-height:90vh; overflow-y:auto; position:relative;">
+            <span style="position:absolute; top:1rem; right:1rem; font-size:1.5rem; cursor:pointer; color:#999;" onclick="document.getElementById('trackingDetailModal').style.display='none'">&times;</span>
+            <div id="trackingDetailContent"></div>
         </div>
-      </section>
+    </div>
+</section>
 
       <section id="impact" class="section impact-section" style="display: none">
         <h2>Calculadora de Impacto</h2>

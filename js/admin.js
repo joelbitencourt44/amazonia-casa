@@ -277,22 +277,35 @@ function openProductModal(id = null) {
   document.getElementById("productForm").reset();
   document.getElementById("productId").value = "";
   document.getElementById("modalTitle").textContent = "Novo Produto";
+  // Limpa preview de imagem
+  const preview = document.getElementById("imagePreview");
+  if (preview) {
+    preview.src = "";
+    preview.style.display = "none";
+  }
+
   if (id) {
     const p = products.find((p) => p.id === id);
     if (p) {
       document.getElementById("modalTitle").textContent = "Editar Produto";
       document.getElementById("productId").value = p.id;
-      document.getElementById("productName").value = p.name;
-      document.getElementById("productCategory").value = p.category;
-      document.getElementById("productPrice").value = p.price;
-      document.getElementById("productStock").value = p.stock;
-      document.getElementById("productCost").value = p.cost || "";
+      document.getElementById("productName").value = p.name || "";
+      document.getElementById("productCategory").value = p.category || "mel";
+      document.getElementById("productPrice").value = p.price || 0;
+      document.getElementById("productStock").value = p.stock || 0;
       document.getElementById("productDescription").value = p.description || "";
       document.getElementById("productBenefits").value = p.benefits || "";
       document.getElementById("productOrigin").value = p.origin || "";
       document.getElementById("productProducer").value = p.producer || "";
-      document.getElementById("productActive").checked = p.active;
-      document.getElementById("productFeatured").checked = p.featured;
+      document.getElementById("productArea").value = p.area || "";
+      document.getElementById("productDate").value = p.date || "";
+      document.getElementById("productCost").value = p.cost || "";
+      document.getElementById("productActive").checked = p.active !== false;
+      document.getElementById("productFeatured").checked = p.featured === true;
+      if (p.image && preview) {
+        preview.src = p.image;
+        preview.style.display = "block";
+      }
     }
   }
   modal.style.display = "flex";
@@ -325,47 +338,67 @@ function saveProduct() {
     ? parseInt(document.getElementById("productId").value)
     : Date.now();
 
-  // Pegar a imagem
   const imageInput = document.getElementById("productImage");
-  let imageData = "";
-
-  if (imageInput.files && imageInput.files[0]) {
+  if (imageInput && imageInput.files && imageInput.files[0]) {
     const reader = new FileReader();
     reader.onload = function (e) {
-      imageData = e.target.result;
+      const imageData = e.target.result;
       finalizarSave(id, imageData);
     };
     reader.readAsDataURL(imageInput.files[0]);
   } else {
-    // Manter imagem existente se estiver editando
     const existing = products.find((p) => p.id === id);
-    imageData = existing?.image || "";
+    const imageData = existing?.image || "";
     finalizarSave(id, imageData);
   }
 }
 
 function finalizarSave(id, imageData) {
-  const data = {
+  const name = document.getElementById("productName").value;
+  const category = document.getElementById("productCategory").value;
+  const price = parseFloat(document.getElementById("productPrice").value);
+  const stock = parseInt(document.getElementById("productStock").value);
+  const description = document.getElementById("productDescription").value;
+  const benefits = document.getElementById("productBenefits").value;
+  const origin = document.getElementById("productOrigin").value;
+  const producer = document.getElementById("productProducer").value;
+  const area = document.getElementById("productArea").value;
+  const date = document.getElementById("productDate").value;
+  const cost = parseFloat(document.getElementById("productCost")?.value) || 0;
+  const active = document.getElementById("productActive").checked;
+  const featured = document.getElementById("productFeatured").checked;
+
+  // 🔍 LOGS PARA DEPURAÇÃO – verifique o console (F12) após salvar
+  console.log("Dados capturados:");
+  console.log("Origem:", origin);
+  console.log("Extrativista:", producer);
+  console.log("Área:", area);
+  console.log("Data:", date);
+
+  const productData = {
     id,
-    name: document.getElementById("productName").value,
-    category: document.getElementById("productCategory").value,
-    price: parseFloat(document.getElementById("productPrice").value),
-    stock: parseInt(document.getElementById("productStock").value),
-    cost: parseFloat(document.getElementById("productCost")?.value) || 0,
-    description: document.getElementById("productDescription").value,
-    benefits: document.getElementById("productBenefits").value,
-    origin: document.getElementById("productOrigin").value,
-    producer: document.getElementById("productProducer").value,
-    active: document.getElementById("productActive").checked,
-    featured: document.getElementById("productFeatured").checked,
+    name,
+    category,
+    price,
+    stock,
+    description,
+    benefits,
+    origin,
+    producer,
+    area,
+    date,
+    cost,
     image: imageData,
-    date: "",
-    area: "",
+    active,
+    featured,
   };
 
   const idx = products.findIndex((p) => p.id === id);
-  if (idx >= 0) products[idx] = data;
-  else products.push(data);
+  if (idx >= 0) {
+    products[idx] = productData;
+  } else {
+    products.push(productData);
+  }
 
   saveAll();
   loadProductsTable();
@@ -439,31 +472,34 @@ function loadCustomersTable() {
 }
 
 function loadCouponsTable() {
-    const tbody = document.getElementById('couponsTable');
-    if (!tbody) return;
+  const tbody = document.getElementById("couponsTable");
+  if (!tbody) return;
 
-    if (coupons.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum cupom.</td></tr>';
-        return;
-    }
+  if (coupons.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="6" style="text-align:center;">Nenhum cupom.</td></tr>';
+    return;
+  }
 
-    tbody.innerHTML = coupons.map(c => {
-        const isUsed = c.usedBy && c.usedBy.length > 0;
-        const isExpired = new Date(c.expiresAt) < new Date();
-        const statusClass = (isUsed || isExpired) ? 'inactive' : 'active';
-        const statusText = isUsed ? 'Usado' : (isExpired ? 'Expirado' : 'Ativo');
+  tbody.innerHTML = coupons
+    .map((c) => {
+      const isUsed = c.usedBy && c.usedBy.length > 0;
+      const isExpired = new Date(c.expiresAt) < new Date();
+      const statusClass = isUsed || isExpired ? "inactive" : "active";
+      const statusText = isUsed ? "Usado" : isExpired ? "Expirado" : "Ativo";
 
-        return `
+      return `
             <tr>
                 <td><strong>${c.code}</strong></td>
                 <td>${c.discount}%</td>
-                <td>${c.assignedTo === 'all' ? 'Todos' : c.assignedTo}</td>
-                <td>${new Date(c.expiresAt).toLocaleDateString('pt-BR')}</td>
+                <td>${c.assignedTo === "all" ? "Todos" : c.assignedTo}</td>
+                <td>${new Date(c.expiresAt).toLocaleDateString("pt-BR")}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 <td><button class="btn-sm btn-delete" onclick="deleteCoupon('${c.code}')">🗑️</button></td>
             </tr>
         `;
-    }).join('');
+    })
+    .join("");
 }
 function openCouponModal() {
   document.getElementById("couponModal").style.display = "flex";
