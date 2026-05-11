@@ -784,5 +784,38 @@
         });
       }
     </script>
+    <script>
+  async function pagarPix() {
+    const res = await fetch('/checkout/pix', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: "Cliente Teste",
+        email: "teste@cliente.com",
+        produto: "Camisa",
+        valor: 5990
+      })
+    });
+    const data = await res.json();
+    console.log("PIX:", data);
+    alert("Pedido PIX criado! Veja o console para detalhes.");
+  }
+
+  async function pagarCartao() {
+    const res = await fetch('/checkout/cartao', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: "Cliente Teste",
+        email: "teste@cliente.com",
+        produto: "Camisa",
+        valor: 5990
+      })
+    });
+    const data = await res.json();
+    console.log("Cartão:", data);
+    alert("Pedido Cartão criado! Veja o console para detalhes.");
+  }
+</script>
   </body>
 </html>
