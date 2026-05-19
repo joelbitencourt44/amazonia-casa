@@ -111,42 +111,111 @@
           </div>
           <button type="submit" class="btn-auth">Entrar</button>
         </form>
-        <form class="auth-form" id="registerForm">
+     
+      <form class="auth-form" id="registerForm">
+        <div class="form-group">
+          <label>Nome Completo *</label>
+          <input
+            type="text"
+            id="regName"
+            required
+            placeholder="Seu nome completo"
+            oninput="onlyLetters(this)"
+          />
+        </div>
+        <div class="form-group">
+          <label>CPF *</label>
+          <input
+            type="text"
+            id="regCpf"
+            required
+            placeholder="000.000.000-00"
+            maxlength="14"
+            oninput="formatCPF(this)"
+          />
+        </div>
+        <div class="form-group">
+          <label>E-mail *</label>
+          <input
+            type="email"
+            id="regEmail"
+            required
+            placeholder="seu@email.com"
+          />
+        </div>
+        <div class="form-group">
+          <label>Telefone *</label>
+          <input
+            type="tel"
+            id="regPhone"
+            required
+            placeholder="(91) 99999-9999"
+            oninput="onlyNumbers(this)"
+            maxlength="11"
+          />
+        </div>
+        <div class="form-group">
+          <label>CEP</label>
+          <input
+            type="text"
+            id="regCep"
+            placeholder="66000000"
+            oninput="onlyNumbers(this)"
+            maxlength="8"
+          />
+        </div>
+        <div class="form-group">
+          <label>Endereço</label>
+          <input
+            type="text"
+            id="regAddress"
+            placeholder="Rua, número, bairro"
+          />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
           <div class="form-group">
-            <label>Nome *</label><input type="text" id="regName" required />
+            <label>Cidade</label>
+            <input
+              type="text"
+              id="regCity"
+              placeholder="Belém"
+              oninput="onlyLetters(this)"
+            />
           </div>
           <div class="form-group">
-            <label>E-mail *</label><input type="email" id="regEmail" required />
+            <label>Estado</label>
+            <input
+              type="text"
+              id="regState"
+              placeholder="PA"
+              oninput="onlyLetters(this)"
+              maxlength="2"
+            />
           </div>
-          <div class="form-group">
-            <label>Telefone *</label><input type="tel" id="regPhone" required />
-          </div>
-          <div class="form-group">
-            <label>CEP</label><input type="text" id="regCep" />
-          </div>
-          <div class="form-group">
-            <label>Endereço</label><input type="text" id="regAddress" />
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
-            <div class="form-group">
-              <label>Cidade</label><input type="text" id="regCity" />
-            </div>
-            <div class="form-group">
-              <label>Estado</label><input type="text" id="regState" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Senha *</label
-            ><input type="password" id="regPassword" required minlength="6" />
-          </div>
-          <div class="form-group">
-            <label>Confirmar Senha *</label
-            ><input type="password" id="regConfirmPassword" required />
-          </div>
-          <button type="submit" class="btn-auth">Criar Conta</button>
-        </form>
-      </div>
-    </div>
+        </div>
+        <div class="form-group">
+          <label>Senha *</label>
+          <input
+            type="password"
+            id="regPassword"
+            required
+            minlength="6"
+            placeholder="Mínimo 6 caracteres"
+          />
+        </div>
+        <div class="form-group">
+          <label>Confirmar Senha *</label>
+          <input
+            type="password"
+            id="regConfirmPassword"
+            required
+            minlength="6"
+            placeholder="Repita a senha"
+          />
+        </div>
+        <button type="submit" class="btn-auth">Criar Conta</button>
+      </form>
+   
     <script>
       document.querySelectorAll(".auth-tab").forEach((tab) => {
         tab.addEventListener("click", () => {
@@ -212,6 +281,7 @@
             name: document.getElementById("regName").value,
             email: document.getElementById("regEmail").value,
             phone: document.getElementById("regPhone").value,
+            cpf: document.getElementById("regCpf").value,
             cep: document.getElementById("regCep").value,
             address: document.getElementById("regAddress").value,
             city: document.getElementById("regCity").value,
@@ -227,6 +297,25 @@
           document.getElementById("successMessage").style.display = "block";
           setTimeout(() => (window.location.href = "index.html"), 1500);
         });
+      function formatCPF(input) {
+        let value = input.value.replace(/\D/g, "");
+        if (value.length > 11) value = value.slice(0, 11);
+        value = value.replace(/(\d{3})(\d)/, "$1.$2");
+        value = value.replace(/(\d{3})(\d)/, "$1.$2");
+        value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        input.value = value;
+      }
+
+      // Permite apenas números (CPF, telefone, CEP)
+      function onlyNumbers(input) {
+        input.value = input.value.replace(/\D/g, "");
+      }
+
+      // Permite apenas letras e espaços (nome, cidade, estado)
+      function onlyLetters(input) {
+        input.value = input.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, "");
+      }
+    
     </script>
   </body>
 </html>

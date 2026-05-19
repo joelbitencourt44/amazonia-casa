@@ -21,7 +21,16 @@
     <header class="header">
       <nav class="nav-container">
         <div class="logo">
-          <span style="font-size: 2rem">🌿</span>
+          <img
+            src="imagem/logo.png.jpeg"
+            alt="Amazônia em Casa"
+            style="height: 80px; width: auto"
+            onerror="
+              this.style.display = 'none';
+              this.nextElementSibling.style.display = 'block';
+            "
+          />
+          <span style="font-size: 2rem; display: none">🌿</span>
           <h1>Amazônia em Casa</h1>
         </div>
         <ul class="nav-menu" id="navMenu">
@@ -48,27 +57,49 @@
 
     <main id="app">
       <section id="home" class="section home-section">
-        <div class="hero">
-          <div class="hero-content">
-            <h2>Direto da Floresta para Sua Casa</h2>
-            <p>Produtos naturais da Amazônia com rastreabilidade completa.</p>
-            <div class="hero-cta">
-              <a href="#products" class="btn btn-primary">Ver Produtos</a>
-              <a href="#impact" class="btn btn-secondary">Nosso Impacto</a>
+        <div
+          class="hero"
+          style="display: flex; flex-direction: column; align-items: center"
+        >
+          <!-- Logo centralizada em cima -->
+          <img
+            src="imagem/logo.png1.JPG"
+            alt="Amazônia em Casa"
+            style="width: 250px; height: auto; margin-bottom: 2rem"
+            onerror="this.style.display = 'none'"
+          />
+
+          <!-- Conteúdo em duas colunas -->
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 3rem;
+              align-items: center;
+              width: 100%;
+            "
+          >
+            <div class="hero-content" style="text-align: left">
+              <h2>Direto da Floresta para Sua Casa</h2>
+              <p>Produtos naturais da Amazônia com rastreabilidade completa.</p>
+              <div class="hero-cta">
+                <a href="#products" class="btn btn-primary">Ver Produtos</a>
+                <a href="#impact" class="btn btn-secondary">Nosso Impacto</a>
+              </div>
             </div>
-          </div>
-          <div class="hero-stats">
-            <div class="stat-card">
-              <span class="stat-number">+500</span
-              ><span class="stat-label">Clientes</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-number">50</span
-              ><span class="stat-label">Famílias Apoiadas</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-number">100%</span
-              ><span class="stat-label">Natural</span>
+            <div class="hero-stats">
+              <div class="stat-card">
+                <span class="stat-number">+500</span
+                ><span class="stat-label">Clientes</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-number">50</span
+                ><span class="stat-label">Famílias Apoiadas</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-number">100%</span
+                ><span class="stat-label">Natural</span>
+              </div>
             </div>
           </div>
         </div>
@@ -100,10 +131,15 @@
           </div>
           <div class="category-filters">
             <button class="filter-btn active" data-category="all">Todos</button>
-            <button class="filter-btn" data-category="mel">Mel</button>
-            <button class="filter-btn" data-category="oleos">Óleos</button>
+            <button class="filter-btn" data-category="meis">Méis</button>
+            <button class="filter-btn" data-category="propolis">
+              Própolis e Pólen
+            </button>
+            <button class="filter-btn" data-category="oleos">
+              Óleos Naturais
+            </button>
             <button class="filter-btn" data-category="suplementos">
-              Suplementos
+              Suplementos Naturais
             </button>
           </div>
         </div>
@@ -115,53 +151,293 @@
         <div id="aboutContent"></div>
       </section>
 
-      <section id="tracking" class="section tracking-section" style="display:none;">
-    <h2>🌿 Rastreabilidade dos Produtos</h2>
-    <p class="section-description">Clique em um produto para conhecer sua origem</p>
-    
-    <!-- Grid de produtos rastreáveis -->
-    <div class="products-grid" id="trackingProductsList"></div>
-    
-    <!-- Modal de detalhes -->
-    <div id="trackingDetailModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:5000; align-items:center; justify-content:center;">
-        <div style="background:white; border-radius:15px; padding:2rem; max-width:600px; width:95%; max-height:90vh; overflow-y:auto; position:relative;">
-            <span style="position:absolute; top:1rem; right:1rem; font-size:1.5rem; cursor:pointer; color:#999;" onclick="document.getElementById('trackingDetailModal').style.display='none'">&times;</span>
+      <section
+        id="tracking"
+        class="section tracking-section"
+        style="display: none"
+      >
+        <h2>🌿 Rastreabilidade dos Produtos</h2>
+        <p
+          class="section-description"
+          style="
+            text-align: center;
+            color: #666;
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+          "
+        >
+          Clique em um produto para conhecer sua origem
+        </p>
+
+        <!-- Grid de produtos rastreáveis -->
+        <div class="products-grid" id="trackingProductsList"></div>
+
+        <!-- Modal de detalhes -->
+        <div
+          id="trackingDetailModal"
+          style="
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <div
+            style="
+              background: white;
+              border-radius: 15px;
+              padding: 2rem;
+              max-width: 600px;
+              width: 95%;
+              max-height: 90vh;
+              overflow-y: auto;
+              position: relative;
+            "
+          >
+            <span
+              style="
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                font-size: 1.5rem;
+                cursor: pointer;
+                color: #999;
+              "
+              onclick="
+                document.getElementById('trackingDetailModal').style.display =
+                  'none'
+              "
+              >&times;</span
+            >
             <div id="trackingDetailContent"></div>
+          </div>
         </div>
-    </div>
-</section>
+      </section>
 
       <section id="impact" class="section impact-section" style="display: none">
-        <h2>Calculadora de Impacto</h2>
+        <h2>🌳 O Impacto da Sua Compra</h2>
+        <p
+          class="section-description"
+          style="
+            text-align: center;
+            color: #666;
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+          "
+        >
+          Cada produto que você compra ajuda a preservar a Floresta Amazônica,
+          apoia famílias ribeirinhas e protege abelhas nativas. Veja o poder da
+          sua escolha:
+        </p>
+
+        <!-- Calculadora -->
         <div class="impact-calculator">
+          <h3 style="text-align: center; color: #2d5a27">
+            💰 Simule o valor da sua compra:
+          </h3>
           <div class="calculator-input">
-            <label>Simule sua compra (R$):</label>
             <input
               type="range"
               id="impactValue"
               min="50"
-              max="500"
+              max="1000"
               value="150"
               step="10"
             />
             <span id="impactDisplay">R$ 150,00</span>
           </div>
+
           <div class="impact-results">
             <div class="impact-card">
-              <span style="font-size: 2.5rem">🌳</span>
-              <h4>Floresta</h4>
-              <p><span id="treesPreserved">3</span> m²</p>
+              <span style="font-size: 3rem">🌳</span>
+              <h4>Floresta Protegida</h4>
+              <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
+                <span id="treesPreserved">1.50</span> ha
+              </p>
+              <p style="color: #666; font-size: 0.9rem">
+                de floresta em pé<br />preservados indiretamente
+              </p>
             </div>
             <div class="impact-card">
-              <span style="font-size: 2.5rem">👨‍👩‍👧‍👦</span>
-              <h4>Famílias</h4>
-              <p><span id="familiesHelped">2</span></p>
+              <span style="font-size: 3rem">👨‍🌾</span>
+              <h4>Famílias Apoiadas</h4>
+              <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
+                <span id="familiesHelped">1</span>
+              </p>
+              <p style="color: #666; font-size: 0.9rem">
+                família(s) ribeirinha(s)<br />diretamente beneficiada(s)
+              </p>
             </div>
             <div class="impact-card">
-              <span style="font-size: 2.5rem">🐝</span>
-              <h4>Abelhas</h4>
-              <p><span id="beesSaved">1.500</span></p>
+              <span style="font-size: 3rem">🐝</span>
+              <h4>Abelhas Protegidas</h4>
+              <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
+                <span id="beesSaved">3.000</span>
+              </p>
+              <p style="color: #666; font-size: 0.9rem">
+                abelhas nativas sem ferrão<br />preservadas de agrotóxicos
+              </p>
             </div>
+          </div>
+        </div>
+
+        <!-- Texto persuasivo -->
+        <div
+          style="
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+          "
+        >
+          <div>
+            <h3 style="color: #2d5a27; margin-bottom: 1rem">
+              🌿 Por que comprar da Amazônia em Casa?
+            </h3>
+            <p style="margin-bottom: 1rem; color: #555; line-height: 1.8">
+              Quando você compra produtos com
+              <strong>rastreabilidade comprovada</strong>, você não está apenas
+              adquirindo um produto natural de qualidade — você está se tornando
+              parte de uma <strong>cadeia de preservação</strong> que transforma
+              a realidade da Amazônia.
+            </p>
+            <p style="margin-bottom: 1rem; color: #555; line-height: 1.8">
+              Cada frasco de mel, cada gota de óleo de copaíba ou andiroba
+              representa o trabalho de
+              <strong>famílias extrativistas</strong> que dependem da floresta
+              em pé para sobreviver. Ao comprar deles, você:
+            </p>
+            <ul
+              style="
+                color: #555;
+                line-height: 2;
+                margin-bottom: 1rem;
+                padding-left: 1.5rem;
+              "
+            >
+              <li>
+                ✅ <strong>Combate o desmatamento</strong> — a floresta vale
+                mais em pé do que derrubada
+              </li>
+              <li>
+                ✅ <strong>Gera renda digna</strong> para comunidades
+                tradicionais
+              </li>
+              <li>
+                ✅ <strong>Preserva abelhas nativas</strong> sem uso de
+                agrotóxicos
+              </li>
+              <li>
+                ✅ <strong>Mantém viva a cultura</strong> e o conhecimento
+                ancestral
+              </li>
+              <li>
+                ✅ <strong>Garante produtos 100% naturais</strong> direto da
+                fonte
+              </li>
+            </ul>
+          </div>
+          <div
+            style="
+              background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+              padding: 2rem;
+              border-radius: 15px;
+              text-align: center;
+            "
+          >
+            <span style="font-size: 5rem; display: block; margin-bottom: 1rem"
+              >🎯</span
+            >
+            <h3 style="color: #2d5a27; margin-bottom: 1rem">Nossa Missão</h3>
+            <p style="color: #555; line-height: 1.8">
+              A <strong>Amazônia em Casa</strong> conecta você diretamente aos
+              produtores da floresta, eliminando intermediários e garantindo que
+              o <strong>valor justo</strong> chegue a quem realmente faz a
+              diferença: <strong>as comunidades tradicionais</strong>.
+            </p>
+            <p style="color: #555; line-height: 1.8; margin-top: 1rem">
+              Desde <strong>2020</strong>, já ajudamos a preservar mais de
+              <strong>1.000 hectares</strong> de floresta, apoiamos
+              <strong>50 famílias</strong> e protegemos
+              <strong>milhões de abelhas nativas</strong>.
+            </p>
+            <a
+              href="#products"
+              style="
+                display: inline-block;
+                margin-top: 1.5rem;
+                background: #2d5a27;
+                color: white;
+                padding: 0.8rem 2rem;
+                border-radius: 25px;
+                text-decoration: none;
+                font-weight: bold;
+              "
+              >🛒 Fazer Parte Dessa História</a
+            >
+          </div>
+        </div>
+
+        <!-- Selos de confiança -->
+        <div
+          style="
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            text-align: center;
+          "
+        >
+          <div
+            style="
+              background: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            "
+          >
+            <span style="font-size: 2.5rem">🔬</span>
+            <h4 style="color: #2d5a27; margin: 0.5rem 0">100% Natural</h4>
+            <p style="color: #666; font-size: 0.9rem">
+              Produtos sem aditivos químicos, direto da natureza
+            </p>
+          </div>
+          <div
+            style="
+              background: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            "
+          >
+            <span style="font-size: 2.5rem">📍</span>
+            <h4 style="color: #2d5a27; margin: 0.5rem 0">
+              Rastreabilidade Total
+            </h4>
+            <p style="color: #666; font-size: 0.9rem">
+              Você sabe exatamente de onde vem cada produto
+            </p>
+          </div>
+          <div
+            style="
+              background: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            "
+          >
+            <span style="font-size: 2.5rem">🤝</span>
+            <h4 style="color: #2d5a27; margin: 0.5rem 0">Comércio Justo</h4>
+            <p style="color: #666; font-size: 0.9rem">
+              Pagamento digno para comunidades tradicionais
+            </p>
           </div>
         </div>
       </section>
@@ -171,23 +447,126 @@
         class="section contact-section"
         style="display: none"
       >
-        <h2>Fale Conosco</h2>
+        <h2>💬 Deixe seu Feedback</h2>
+
         <div class="contact-container">
           <div class="contact-info" id="contactInfo">
             <h3>Amazônia em Casa</h3>
             <p><i class="fas fa-map-marker-alt"></i> Endereço aqui</p>
             <p><i class="fas fa-phone"></i> (91) 00000-0000</p>
             <p><i class="fas fa-clock"></i> Horário aqui</p>
-            <div class="social-links">
-              <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
-              <a href="#" target="_blank"><i class="fab fa-whatsapp"></i></a>
+
+            <!-- Redes sociais -->
+            <div style="display: flex; gap: 12px; margin-top: 15px">
+              <!-- Instagram -->
+              <a
+                href="https://instagram.com/seuinstagram"
+                target="_blank"
+                style="
+                  background: #e4405f;
+                  width: 42px;
+                  height: 42px;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  text-decoration: none;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 448 512"
+                  width="20"
+                  height="20"
+                  fill="white"
+                >
+                  <path
+                    d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"
+                  />
+                </svg>
+              </a>
+              <!-- Facebook -->
+              <a
+                href="https://facebook.com/seufacebook"
+                target="_blank"
+                style="
+                  background: #1877f2;
+                  width: 42px;
+                  height: 42px;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  text-decoration: none;
+                "
+              >
+                <span style="color: white; font-size: 20px; font-weight: bold"
+                  >f</span
+                >
+              </a>
+              <!-- WhatsApp -->
+              <a
+                href="https://wa.me/seuwhatsapp"
+                target="_blank"
+                style="
+                  background: #25d366;
+                  width: 42px;
+                  height: 42px;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  text-decoration: none;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 448 512"
+                  width="20"
+                  height="20"
+                  fill="white"
+                >
+                  <path
+                    d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"
+                  />
+                </svg>
+              </a>
             </div>
           </div>
+
           <form class="contact-form" id="contactForm">
-            <input type="text" placeholder="Seu nome" required />
-            <input type="email" placeholder="Seu e-mail" required />
-            <textarea placeholder="Sua mensagem" rows="5" required></textarea>
-            <button type="submit" class="btn btn-primary">Enviar</button>
+            <p
+              style="
+                text-align: center;
+                color: #666;
+                margin-bottom: 1rem;
+                font-size: 0.95rem;
+              "
+            >
+              Sua opinião é muito importante para nós!<br />Envie suas
+              sugestões, elogios ou críticas.
+            </p>
+            <input
+              type="text"
+              id="contactName"
+              placeholder="Seu nome"
+              required
+            />
+            <input
+              type="email"
+              id="contactEmail"
+              placeholder="Seu e-mail"
+              required
+            />
+            <textarea
+              id="contactMessage"
+              placeholder="Sua mensagem, sugestão ou opinião..."
+              rows="5"
+              required
+            ></textarea>
+            <button type="submit" class="btn btn-primary">
+              📩 Enviar Mensagem
+            </button>
           </form>
         </div>
       </section>
@@ -204,6 +583,9 @@
           <ul>
             <li><a href="#products">Produtos</a></li>
             <li><a href="#tracking">Rastreabilidade</a></li>
+            <li><a href="#impact">Impacto</a></li>
+            <li><a href="#contact">Contato</a></li>
+            <li><a href="#about">Sobre</a></li>
           </ul>
         </div>
         <div class="footer-section">
@@ -213,7 +595,16 @@
           </div>
         </div>
       </div>
-      <div class="footer-bottom"><p>&copy; 2026</p></div>
+      <div class="footer-bottom">
+        <p>&copy; 2026</p>
+        <p>
+          <a
+            href="acesso.html"
+            style="color: #888; text-decoration: none; font-size: 0.9rem"
+            >Amazônia em Casa</a
+          >
+        </p>
+      </div>
     </footer>
 
     <!-- Carrinho -->
@@ -785,37 +1176,37 @@
       }
     </script>
     <script>
-  async function pagarPix() {
-    const res = await fetch('/checkout/pix', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nome: "Cliente Teste",
-        email: "teste@cliente.com",
-        produto: "Camisa",
-        valor: 5990
-      })
-    });
-    const data = await res.json();
-    console.log("PIX:", data);
-    alert("Pedido PIX criado! Veja o console para detalhes.");
-  }
+      async function pagarPix() {
+        const res = await fetch("/checkout/pix", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nome: "Cliente Teste",
+            email: "teste@cliente.com",
+            produto: "Camisa",
+            valor: 5990,
+          }),
+        });
+        const data = await res.json();
+        console.log("PIX:", data);
+        alert("Pedido PIX criado! Veja o console para detalhes.");
+      }
 
-  async function pagarCartao() {
-    const res = await fetch('/checkout/cartao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nome: "Cliente Teste",
-        email: "teste@cliente.com",
-        produto: "Camisa",
-        valor: 5990
-      })
-    });
-    const data = await res.json();
-    console.log("Cartão:", data);
-    alert("Pedido Cartão criado! Veja o console para detalhes.");
-  }
-</script>
+      async function pagarCartao() {
+        const res = await fetch("/checkout/cartao", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nome: "Cliente Teste",
+            email: "teste@cliente.com",
+            produto: "Camisa",
+            valor: 5990,
+          }),
+        });
+        const data = await res.json();
+        console.log("Cartão:", data);
+        alert("Pedido Cartão criado! Veja o console para detalhes.");
+      }
+    </script>
   </body>
 </html>

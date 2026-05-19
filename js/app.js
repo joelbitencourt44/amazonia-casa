@@ -75,9 +75,26 @@ function updateSiteContent() {
       <p><i class="fas fa-clock"></i> ${siteConfig.business_hours || ""}</p>
       <div class="social-links">
         <a href="${siteConfig.social?.instagram || "#"}" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="${siteConfig.social?.facebook || "https://facebook.com/"}" target="_blank"><i class="fab fa-facebook-f"></i></a>
         <a href="https://wa.me/${siteConfig.whatsapp || ""}" target="_blank"><i class="fab fa-whatsapp"></i></a>
-      </div>    `;
+      </div>
+    `;
   }
+}
+
+const contactInfo = document.getElementById("contactInfo");
+if (contactInfo) {
+  contactInfo.innerHTML = `
+        <h3>${siteConfig.store_name || "Minha Loja"}</h3>
+        <p><i class="fas fa-map-marker-alt"></i> ${siteConfig.address || ""}</p>
+        <p><i class="fas fa-phone"></i> ${siteConfig.phone || ""}</p>
+        <p><i class="fas fa-clock"></i> ${siteConfig.business_hours || ""}</p>
+        <div class="social-links">
+            <a href="${siteConfig.social?.instagram || "#"}" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="${siteConfig.social?.facebook || "https://facebook.com/"}" target="_blank" style="background:#1877F2;color:white;"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://wa.me/${siteConfig.whatsapp || ""}" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+    `;
 }
 
 function checkLoggedUser() {
@@ -96,7 +113,9 @@ function checkLoggedUser() {
         <p style="font-weight:bold;margin-bottom:0.5rem;">${user.name}</p>
         <p style="font-size:0.8rem;color:#999;margin-bottom:0.5rem;">${user.email}</p>
         <hr style="margin:0.5rem 0;">
+        <a href="meu-perfil.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">👤 Meu Perfil</a>
         <a href="meus-pedidos.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">📋 Meus Pedidos</a>
+        <a href="minhas-recompensas.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">🏆 Minhas Recompensas</a>
         <hr style="margin:0.5rem 0;">
         <button onclick="logout()" style="display:block;width:100%;padding:0.5rem 0;background:none;border:none;color:red;cursor:pointer;text-align:left;font-size:1rem;">🚪 Sair</button>
       `;
@@ -157,7 +176,7 @@ function loadFeaturedProducts() {
   );
 }
 function createProductCard(p) {
-  const emoji = { mel: "🍯", oleos: "🧴", suplementos: "💊" };
+  const emoji = { meis: "🍯", propolis: "🐝", oleos: "🧴", suplementos: "💊" };
   const imageHTML = p.image
     ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:200px;object-fit:cover;">`
     : `<div class="product-image">${emoji[p.category] || "🌿"}</div>`;
@@ -197,16 +216,30 @@ function showTrackingInfo(p) {
 }
 
 function showSection(id) {
+  // Esconde todas as seções
   document
     .querySelectorAll(".section")
     .forEach((s) => (s.style.display = "none"));
+
+  // Mostra a seção clicada
   const sec = document.getElementById(id);
   if (sec) {
     sec.style.display = "block";
     if (id === "products") loadAllProducts();
+
+    // Fecha o menu mobile se estiver aberto
     const navMenu = document.getElementById("navMenu");
     if (navMenu) navMenu.classList.remove("open");
-    sec.scrollIntoView({ behavior: "smooth" });
+
+    // Rola a página para a seção com um deslocamento para compensar o cabeçalho fixo
+    const headerHeight = document.querySelector(".header")?.offsetHeight || 70;
+    const sectionTop =
+      sec.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+
+    window.scrollTo({
+      top: sectionTop,
+      behavior: "smooth",
+    });
   }
 }
 
@@ -235,16 +268,25 @@ function loadAllProducts(cat = "all") {
 }
 
 function setupNavigation() {
-  document.querySelectorAll(".nav-menu a").forEach((link) => {
+  // Pega TODOS os links que começam com # (menu, botões, footer, etc.)
+  document.querySelectorAll("a[href^='#']").forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      showSection(link.getAttribute("href").substring(1));
+      const sectionId = link.getAttribute("href").substring(1);
+      showSection(sectionId);
+
+      // Atualiza classe active no menu
       document
         .querySelectorAll(".nav-menu a")
         .forEach((l) => l.classList.remove("active"));
-      link.classList.add("active");
+      const menuLink = document.querySelector(
+        `.nav-menu a[href="#${sectionId}"]`,
+      );
+      if (menuLink) menuLink.classList.add("active");
     });
   });
+
+  // Botão do menu mobile
   document
     .getElementById("menuToggle")
     ?.addEventListener("click", () =>
@@ -423,7 +465,7 @@ function renderCart() {
     return;
   }
   if (footer) footer.style.display = "block";
-  const emojiMap = { mel: "🍯", oleos: "🧴", suplementos: "💊" };
+  const emoji = { meis: "🍯", propolis: "🐝", oleos: "🧴", suplementos: "💊" };
   items.innerHTML = cart
     .map((i) => {
       const product = products.find((p) => p.id === i.id);
@@ -511,11 +553,16 @@ function setupImpactCalculator() {
   slider.addEventListener("input", () => {
     const v = parseInt(slider.value);
     document.getElementById("impactDisplay").textContent = "R$ " + v + ",00";
-    document.getElementById("treesPreserved").textContent = Math.round(v / 50);
-    document.getElementById("familiesHelped").textContent = Math.round(v / 75);
-    document.getElementById("beesSaved").textContent = (
-      v * 10
-    ).toLocaleString();
+
+    // Cálculos de impacto
+    const hectares = (v / 100).toFixed(2);
+    const familias = Math.max(1, Math.round(v / 150));
+    const abelhas = Math.round(v * 20);
+
+    document.getElementById("treesPreserved").textContent = hectares;
+    document.getElementById("familiesHelped").textContent = familias;
+    document.getElementById("beesSaved").textContent =
+      abelhas.toLocaleString("pt-BR");
   });
   slider.dispatchEvent(new Event("input"));
 }
@@ -980,3 +1027,40 @@ function attachProductEvents(container, productList) {
     });
   });
 }
+
+// Processar formulário de contato
+document
+  .getElementById("contactForm")
+  ?.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("contactName").value.trim();
+    const email = document.getElementById("contactEmail").value.trim();
+    const message = document.getElementById("contactMessage").value.trim();
+
+    if (!name || !email || !message) {
+      alert("Preencha todos os campos!");
+      return;
+    }
+
+    // Salvar no localStorage para o admin ver
+    const feedbacks =
+      JSON.parse(localStorage.getItem("amazoniaFeedbacks")) || [];
+    feedbacks.push({
+      id: Date.now(),
+      name,
+      email,
+      message,
+      date: new Date().toISOString(),
+      read: false,
+    });
+    localStorage.setItem("amazoniaFeedbacks", JSON.stringify(feedbacks));
+
+    // Limpar formulário
+    document.getElementById("contactForm").reset();
+
+    // Mostrar confirmação
+    alert(
+      "✅ Mensagem enviada com sucesso! Obrigado pelo seu feedback! 🌿\n\nSua mensagem foi registrada e será lida pela nossa equipe.",
+    );
+  });

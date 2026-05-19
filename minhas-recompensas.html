@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minhas Recompensas - Amazônia em Casa</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .rewards-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+      }
+      .rewards-container h2 {
+        color: #2d5a27;
+        text-align: center;
+        margin-bottom: 0.5rem;
+      }
+      .total-points {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 2rem;
+      }
+      .total-points strong {
+        color: #2d5a27;
+        font-size: 2rem;
+        display: block;
+      }
+      .progress-bar-container {
+        background: #e0e0e0;
+        border-radius: 25px;
+        height: 30px;
+        margin: 1.5rem 0;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        background: linear-gradient(90deg, #2d5a27, #4a7c3f);
+        height: 100%;
+        border-radius: 25px;
+        transition: width 1s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.85rem;
+      }
+      .reward-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        border-left: 5px solid #e0e0e0;
+      }
+      .reward-card.achieved {
+        border-left-color: #2d5a27;
+        background: #f1f8e9;
+      }
+      .reward-card.locked {
+        opacity: 0.6;
+      }
+      .reward-icon {
+        font-size: 3rem;
+        min-width: 70px;
+        text-align: center;
+      }
+      .reward-info {
+        flex: 1;
+      }
+      .reward-info h3 {
+        margin-bottom: 0.3rem;
+      }
+      .reward-info p {
+        color: #666;
+        font-size: 0.9rem;
+      }
+      .reward-badge {
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.85rem;
+      }
+      .badge-achieved {
+        background: #2d5a27;
+        color: white;
+      }
+      .badge-locked {
+        background: #e0e0e0;
+        color: #999;
+      }
+      .no-rewards {
+        text-align: center;
+        padding: 3rem;
+        color: #999;
+      }
+      .btn-back {
+        display: inline-block;
+        margin-top: 2rem;
+        background: #2d5a27;
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 25px;
+        text-decoration: none;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <nav class="nav-container">
+        <div class="logo">
+          <span style="font-size: 2rem">🌿</span>
+          <h1>Amazônia em Casa</h1>
+        </div>
+        <div class="nav-actions">
+          <a href="index.html" class="btn-login">🏠 Voltar para Loja</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="rewards-container">
+      <h2>🏆 Minhas Recompensas</h2>
+
+      <div id="rewardsContent"></div>
+
+      <!-- Cupons disponíveis -->
+      <div id="myCouponsSection" style="margin-top: 2rem"></div>
+
+      <a href="index.html" class="btn-back">← Voltar para a Loja</a>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
+
+        if (!user) {
+          document.getElementById("rewardsContent").innerHTML = `
+                    <div class="no-rewards">
+                        <span style="font-size:4rem;">🔒</span>
+                        <p>Faça login para ver suas recompensas.</p>
+                        <a href="cadastro.html" class="btn-back">Entrar / Cadastrar</a>
+                    </div>
+                `;
+          return;
+        }
+
+        const allOrders =
+          JSON.parse(localStorage.getItem("amazoniaOrders")) || [];
+        const myOrders = allOrders.filter(
+          (o) => o.customer?.email === user.email && o.status !== "cancelled",
+        );
+        const totalSpent = myOrders.reduce((s, o) => s + (o.total || 0), 0);
+        const totalPoints = Math.floor(totalSpent);
+
+        const rewards =
+          JSON.parse(localStorage.getItem("amazoniaRewards")) || [];
+        const activeRewards = rewards
+          .filter((r) => r.active)
+          .sort((a, b) => a.minValue - b.minValue);
+
+        const redeemedRewards =
+          JSON.parse(localStorage.getItem("amazoniaRedeemedRewards")) || [];
+        const userRedeemed = redeemedRewards
+          .filter((r) => r.userEmail === user.email)
+          .map((r) => r.rewardId);
+
+        const nextReward = activeRewards.find((r) => r.minValue > totalPoints);
+        const currentReward = [...activeRewards]
+          .reverse()
+          .find((r) => r.minValue <= totalPoints);
+
+        let progressHTML = "";
+        if (nextReward) {
+          const progressPercent = Math.min(
+            100,
+            Math.round((totalPoints / nextReward.minValue) * 100),
+          );
+          const missingPoints = nextReward.minValue - totalPoints;
+          progressHTML = `
+                    <div class="total-points">
+                        <p>Você tem</p>
+                        <strong>🏅 ${totalPoints.toLocaleString("pt-BR")} pontos</strong>
+                        ${currentReward ? `<p style="color:#2d5a27;margin-top:0.5rem;">Nível atual: <strong>${currentReward.icon} ${currentReward.name}</strong></p>` : ""}
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width:${progressPercent}%;">${progressPercent > 15 ? progressPercent + "%" : ""}</div>
+                    </div>
+                    <p style="text-align:center;color:#666;margin-bottom:2rem;">
+                        Faltam <strong>${missingPoints.toLocaleString("pt-BR")} pontos</strong> para: <strong>${nextReward.icon} ${nextReward.name}</strong>
+                    </p>
+                `;
+        } else if (currentReward) {
+          progressHTML = `
+                    <div class="total-points">
+                        <p>Você tem</p>
+                        <strong>🏅 ${totalPoints.toLocaleString("pt-BR")} pontos</strong>
+                        <p style="color:#2d5a27;margin-top:0.5rem;">Nível máximo atingido: <strong>${currentReward.icon} ${currentReward.name}</strong> 🎉</p>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width:100%;">100% 🎉</div>
+                    </div>
+                `;
+        } else {
+          progressHTML = `
+                    <div class="total-points">
+                        <p>Você tem</p>
+                        <strong>🏅 ${totalPoints.toLocaleString("pt-BR")} pontos</strong>
+                    </div>
+                `;
+        }
+
+        let rewardsListHTML =
+          '<h3 style="color:#2d5a27;margin-top:2rem;">📋 Todos os Níveis</h3>';
+        if (activeRewards.length === 0) {
+          rewardsListHTML +=
+            '<div class="no-rewards"><span style="font-size:4rem;">🏆</span><p>Nenhum programa de recompensas disponível.</p></div>';
+        } else {
+          rewardsListHTML += activeRewards
+            .map((r) => {
+              const achieved = totalPoints >= r.minValue;
+              const alreadyRedeemed = userRedeemed.includes(r.id);
+              let actionButton = "";
+              if (achieved && !alreadyRedeemed) {
+                actionButton = `<button onclick="redeemReward('${r.id}', '${r.name}', ${r.minValue}, '${r.description.replace(/'/g, "\\'")}')" style="background:#2d5a27;color:white;border:none;padding:0.5rem 1rem;border-radius:20px;cursor:pointer;font-weight:bold;margin-top:0.5rem;">🎁 Resgatar</button>`;
+              } else if (achieved && alreadyRedeemed) {
+                actionButton = `<span style="background:#e0e0e0;color:#999;padding:0.5rem 1rem;border-radius:20px;font-size:0.85rem;">✅ Já resgatado</span>`;
+              }
+              return `
+                        <div class="reward-card ${achieved ? "achieved" : "locked"}">
+                            <div class="reward-icon">${r.icon}</div>
+                            <div class="reward-info">
+                                <h3 style="color:${r.color};">${r.name}</h3>
+                                <p>${r.description}</p>
+                                <p style="font-size:0.8rem;color:#999;">A partir de ${Math.floor(r.minValue).toLocaleString("pt-BR")} pontos</p>
+                                ${actionButton}
+                            </div>
+                            <span class="reward-badge ${achieved ? "badge-achieved" : "badge-locked"}">
+                                ${achieved ? "✅ Conquistado" : "🔒 Bloqueado"}
+                            </span>
+                        </div>
+                    `;
+            })
+            .join("");
+        }
+
+        document.getElementById("rewardsContent").innerHTML =
+          progressHTML + rewardsListHTML;
+
+        // Cupons disponíveis
+        const allCoupons =
+          JSON.parse(localStorage.getItem("amazoniaCoupons")) || [];
+        const myCoupons = allCoupons.filter(
+          (c) =>
+            (c.assignedTo === "all" || c.assignedTo === user.email) &&
+            (!c.usedBy || !c.usedBy.includes(user.email)) &&
+            new Date(c.expiresAt) > new Date(),
+        );
+
+        let couponsHTML =
+          '<h3 style="color:#2d5a27;margin-top:2rem;">🎫 Meus Cupons Disponíveis</h3>';
+        if (myCoupons.length === 0) {
+          couponsHTML +=
+            '<div class="reward-card locked"><div class="reward-icon">🎫</div><div class="reward-info"><h3>Nenhum cupom disponível</h3><p style="color:#999;">Você ainda não tem cupons. Continue comprando e resgatando recompensas!</p></div></div>';
+        } else {
+          couponsHTML += myCoupons
+            .map(
+              (c) => `
+                    <div class="reward-card achieved" style="border-left-color:#DAA520;background:#fffef5;">
+                        <div class="reward-icon">🎫</div>
+                        <div class="reward-info">
+                            <h3 style="color:#8B4513;">Cupom: <strong style="background:#2d5a27;color:white;padding:0.2rem 0.5rem;border-radius:5px;font-family:monospace;">${c.code}</strong></h3>
+                            <p style="font-size:1.2rem;font-weight:bold;color:#2d5a27;">${c.discount}% de desconto</p>
+                            <p style="font-size:0.8rem;color:#999;">Válido até ${new Date(c.expiresAt).toLocaleDateString("pt-BR")}</p>
+                            <p style="font-size:0.8rem;color:#666;">Use este código no carrinho de compras!</p>
+                        </div>
+                        <span style="background:#DAA520;color:white;padding:0.3rem 1rem;border-radius:20px;font-weight:bold;">Disponível</span>
+                    </div>
+                `,
+            )
+            .join("");
+        }
+
+        document.getElementById("myCouponsSection").innerHTML = couponsHTML;
+      });
+
+      function redeemReward(rewardId, rewardName, minValue, description) {
+        const user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
+        if (!user) return;
+
+        if (
+          confirm(
+            `🎁 Resgatar recompensa: ${rewardName}?\n\n${description}\n\nUm cupom de desconto será gerado para você!`,
+          )
+        ) {
+          const coupons =
+            JSON.parse(localStorage.getItem("amazoniaCoupons")) || [];
+          const couponCode =
+            "RECOMPENSA" + Date.now().toString().slice(-6).toUpperCase();
+          const discountMatch = description.match(/(\d+)%/);
+          const discount = discountMatch ? parseInt(discountMatch[1]) : 10;
+
+          coupons.push({
+            code: couponCode,
+            discount: discount,
+            assignedTo: user.email,
+            expiresAt: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+            usedBy: [],
+            createdAt: new Date().toISOString(),
+          });
+
+          localStorage.setItem("amazoniaCoupons", JSON.stringify(coupons));
+
+          const redeemedRewards =
+            JSON.parse(localStorage.getItem("amazoniaRedeemedRewards")) || [];
+          redeemedRewards.push({
+            userEmail: user.email,
+            rewardId: rewardId,
+            couponCode: couponCode,
+            redeemedAt: new Date().toISOString(),
+          });
+          localStorage.setItem(
+            "amazoniaRedeemedRewards",
+            JSON.stringify(redeemedRewards),
+          );
+
+          alert(
+            `🎉 Recompensa resgatada!\n\nSeu cupom: ${couponCode}\nDesconto: ${discount}%\n\nUse este código no carrinho de compras!\nVálido por 30 dias.`,
+          );
+          location.reload();
+        }
+      }
+    </script>
+  </body>
+</html>
