@@ -1,92 +1,167 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Admin - Amazônia em Casa</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css" />
     <style>
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #1a1a2e, #2d5a27);
-            padding: 2rem;
-        }
-        .login-card {
-            background: #fff;
-            border-radius: 20px;
-            padding: 2.5rem;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-        .login-card h2 { color: #2d5a27; margin-bottom: 0.5rem; }
-        .login-card p { color: #999; margin-bottom: 1.5rem; }
-        .form-group { margin-bottom: 1rem; text-align: left; }
-        .form-group label { display: block; margin-bottom: 0.3rem; font-weight: 500; color: #555; }
-        .form-group input { width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; }
-        .form-group input:focus { outline: none; border-color: #2d5a27; }
-        .btn-login { width: 100%; padding: 1rem; background: #2d5a27; color: #fff; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 1rem; }
-        .btn-login:hover { background: #4a7c3f; }
-        .error-message { background: #ffe0e0; color: #c62828; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+      .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1a1a2e, #2d5a27);
+        padding: 2rem;
+      }
+      .login-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 2.5rem;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        text-align: center;
+      }
+      .login-card h2 {
+        color: #2d5a27;
+        margin-bottom: 0.5rem;
+      }
+      .login-card p {
+        color: #999;
+        margin-bottom: 1.5rem;
+      }
+      .form-group {
+        margin-bottom: 1rem;
+        text-align: left;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+        color: #555;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 0.8rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+      }
+      .form-group input:focus {
+        outline: none;
+        border-color: #2d5a27;
+      }
+      .btn-login {
+        width: 100%;
+        padding: 1rem;
+        background: #2d5a27;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1rem;
+      }
+      .btn-login:hover {
+        background: #4a7c3f;
+      }
+      .error-message {
+        background: #ffe0e0;
+        color: #c62828;
+        padding: 0.8rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: none;
+      }
     </style>
-</head>
-<body>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  </head>
+  <body>
     <div class="login-container">
-        <div class="login-card">
-            <span style="font-size:3rem;">🌿</span>
-            <h2>Painel de Controle</h2>
-            <p>Amazônia em Casa</p>
-            <div class="error-message" id="errorMessage"></div>
-            <form id="adminLoginForm">
-                <div class="form-group"><label>E-mail</label><input type="email" id="adminEmail" required placeholder="admin@email.com"></div>
-                <div class="form-group"><label>Senha</label><input type="password" id="adminPassword" required placeholder="Sua senha"></div>
-                <button type="submit" class="btn-login">🔐 Entrar</button>
-            </form>
-        </div>
+      <div class="login-card">
+        <span style="font-size: 3rem">🌿</span>
+        <h2>Painel de Controle</h2>
+        <p>Amazônia em Casa</p>
+        <div class="error-message" id="errorMessage"></div>
+        <form id="adminLoginForm">
+          <div class="form-group">
+            <label>E-mail</label
+            ><input
+              type="email"
+              id="adminEmail"
+              required
+              placeholder="admin@email.com"
+            />
+          </div>
+          <div class="form-group">
+            <label>Senha</label
+            ><input
+              type="password"
+              id="adminPassword"
+              required
+              placeholder="Sua senha"
+            />
+          </div>
+          <button type="submit" class="btn-login">🔐 Entrar</button>
+        </form>
+      </div>
     </div>
 
     <script>
-        // Admin Master padrão
-        const defaultAdmins = [{
-            id: 'admin-master',
-            name: 'Administrador Master',
-            email: 'admin@amazoniaemcasa.com.br',
-            password: 'admin123',
-            cpf: '',
-            birthDate: '',
-            photo: '',
-            role: 'master',
-            createdAt: new Date().toISOString()
-        }];
-        
-        if (!localStorage.getItem('amazoniaAdmins')) {
-            localStorage.setItem('amazoniaAdmins', JSON.stringify(defaultAdmins));
-        }
-        
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('adminEmail').value.trim();
-            const password = document.getElementById('adminPassword').value;
-            const admins = JSON.parse(localStorage.getItem('amazoniaAdmins')) || [];
-            const admin = admins.find(a => a.email === email && a.password === password);
-            
-            if (admin) {
-                const session = {
-                    id: admin.id, name: admin.name, email: admin.email,
-                    photo: admin.photo || '', role: admin.role,
-                    loginAt: new Date().toISOString()
-                };
-                localStorage.setItem('amazoniaAdminSession', JSON.stringify(session));
-                window.location.href = 'admin.html';
-            } else {
-                document.getElementById('errorMessage').textContent = '❌ E-mail ou senha incorretos.';
-                document.getElementById('errorMessage').style.display = 'block';
-            }
+      var defaultAdmins = [
+        {
+          id: "admin-master",
+          name: "Administrador Master",
+          email: "admin@amazoniaemcasa.com.br",
+          password: "admin123",
+          cpf: "",
+          birthDate: "",
+          photo: "",
+          role: "master",
+          createdAt: new Date().toISOString(),
+        },
+      ];
+      if (!localStorage.getItem("amazoniaAdmins")) {
+        localStorage.setItem("amazoniaAdmins", JSON.stringify(defaultAdmins));
+      }
+
+      document
+        .getElementById("adminLoginForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          var email = document.getElementById("adminEmail").value.trim();
+          var password = document.getElementById("adminPassword").value;
+          var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
+          var admin = admins.find(function (a) {
+            return a.email === email && a.password === password;
+          });
+          if (admin) {
+            var session = {
+              id: admin.id,
+              name: admin.name,
+              email: admin.email,
+              photo: admin.photo || "",
+              role: admin.role,
+              loginAt: new Date().toISOString(),
+            };
+            localStorage.setItem(
+              "amazoniaAdminSession",
+              JSON.stringify(session),
+            );
+            window.location.href = "admin.html";
+          } else {
+            document.getElementById("errorMessage").textContent =
+              "❌ E-mail ou senha incorretos.";
+            document.getElementById("errorMessage").style.display = "block";
+          }
         });
     </script>
-</body>
+
+    <script src="js/firebase-config.js"></script>
+  </body>
 </html>

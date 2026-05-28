@@ -109,6 +109,9 @@
         text-align: center;
       }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   </head>
   <body>
     <header class="header">
@@ -125,185 +128,204 @@
 
     <div class="rewards-container">
       <h2>🏆 Minhas Recompensas</h2>
-
       <div id="rewardsContent"></div>
-
-      <!-- Cupons disponíveis -->
       <div id="myCouponsSection" style="margin-top: 2rem"></div>
-
       <a href="index.html" class="btn-back">← Voltar para a Loja</a>
     </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        const user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
-
+        var user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
         if (!user) {
-          document.getElementById("rewardsContent").innerHTML = `
-                    <div class="no-rewards">
-                        <span style="font-size:4rem;">🔒</span>
-                        <p>Faça login para ver suas recompensas.</p>
-                        <a href="cadastro.html" class="btn-back">Entrar / Cadastrar</a>
-                    </div>
-                `;
+          document.getElementById("rewardsContent").innerHTML =
+            '<div class="no-rewards"><span style="font-size:4rem;">🔒</span><p>Faça login para ver suas recompensas.</p><a href="cadastro.html" class="btn-back">Entrar / Cadastrar</a></div>';
           return;
         }
 
-        const allOrders =
+        var allOrders =
           JSON.parse(localStorage.getItem("amazoniaOrders")) || [];
-        const myOrders = allOrders.filter(
-          (o) => o.customer?.email === user.email && o.status !== "cancelled",
-        );
-        const totalSpent = myOrders.reduce((s, o) => s + (o.total || 0), 0);
-        const totalPoints = Math.floor(totalSpent);
+        var myOrders = allOrders.filter(function (o) {
+          return o.customer?.email === user.email && o.status !== "cancelled";
+        });
+        var totalSpent = myOrders.reduce(function (s, o) {
+          return s + (o.total || 0);
+        }, 0);
+        var totalPoints = Math.floor(totalSpent);
 
-        const rewards =
-          JSON.parse(localStorage.getItem("amazoniaRewards")) || [];
-        const activeRewards = rewards
-          .filter((r) => r.active)
-          .sort((a, b) => a.minValue - b.minValue);
+        var rewards = JSON.parse(localStorage.getItem("amazoniaRewards")) || [];
+        var activeRewards = rewards
+          .filter(function (r) {
+            return r.active;
+          })
+          .sort(function (a, b) {
+            return a.minValue - b.minValue;
+          });
 
-        const redeemedRewards =
+        var redeemedRewards =
           JSON.parse(localStorage.getItem("amazoniaRedeemedRewards")) || [];
-        const userRedeemed = redeemedRewards
-          .filter((r) => r.userEmail === user.email)
-          .map((r) => r.rewardId);
+        var userRedeemed = redeemedRewards
+          .filter(function (r) {
+            return r.userEmail === user.email;
+          })
+          .map(function (r) {
+            return r.rewardId;
+          });
 
-        const nextReward = activeRewards.find((r) => r.minValue > totalPoints);
-        const currentReward = [...activeRewards]
+        var nextReward = activeRewards.find(function (r) {
+          return r.minValue > totalPoints;
+        });
+        var currentReward = activeRewards
+          .slice()
           .reverse()
-          .find((r) => r.minValue <= totalPoints);
+          .find(function (r) {
+            return r.minValue <= totalPoints;
+          });
 
-        let progressHTML = "";
+        var progressHTML = "";
         if (nextReward) {
-          const progressPercent = Math.min(
+          var progressPercent = Math.min(
             100,
             Math.round((totalPoints / nextReward.minValue) * 100),
           );
-          const missingPoints = nextReward.minValue - totalPoints;
-          progressHTML = `
-                    <div class="total-points">
-                        <p>Você tem</p>
-                        <strong>🏅 ${totalPoints.toLocaleString("pt-BR")} pontos</strong>
-                        ${currentReward ? `<p style="color:#2d5a27;margin-top:0.5rem;">Nível atual: <strong>${currentReward.icon} ${currentReward.name}</strong></p>` : ""}
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width:${progressPercent}%;">${progressPercent > 15 ? progressPercent + "%" : ""}</div>
-                    </div>
-                    <p style="text-align:center;color:#666;margin-bottom:2rem;">
-                        Faltam <strong>${missingPoints.toLocaleString("pt-BR")} pontos</strong> para: <strong>${nextReward.icon} ${nextReward.name}</strong>
-                    </p>
-                `;
+          var missingPoints = nextReward.minValue - totalPoints;
+          progressHTML =
+            '<div class="total-points"><p>Você tem</p><strong>🏅 ' +
+            totalPoints.toLocaleString("pt-BR") +
+            " pontos</strong>" +
+            (currentReward
+              ? '<p style="color:#2d5a27;margin-top:0.5rem;">Nível atual: <strong>' +
+                currentReward.icon +
+                " " +
+                currentReward.name +
+                "</strong></p>"
+              : "") +
+            '</div><div class="progress-bar-container"><div class="progress-bar-fill" style="width:' +
+            progressPercent +
+            '%;">' +
+            (progressPercent > 15 ? progressPercent + "%" : "") +
+            '</div></div><p style="text-align:center;color:#666;margin-bottom:2rem;">Faltam <strong>' +
+            missingPoints.toLocaleString("pt-BR") +
+            " pontos</strong> para: <strong>" +
+            nextReward.icon +
+            " " +
+            nextReward.name +
+            "</strong></p>";
         } else if (currentReward) {
-          progressHTML = `
-                    <div class="total-points">
-                        <p>Você tem</p>
-                        <strong>🏅 ${totalPoints.toLocaleString("pt-BR")} pontos</strong>
-                        <p style="color:#2d5a27;margin-top:0.5rem;">Nível máximo atingido: <strong>${currentReward.icon} ${currentReward.name}</strong> 🎉</p>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width:100%;">100% 🎉</div>
-                    </div>
-                `;
+          progressHTML =
+            '<div class="total-points"><p>Você tem</p><strong>🏅 ' +
+            totalPoints.toLocaleString("pt-BR") +
+            ' pontos</strong><p style="color:#2d5a27;margin-top:0.5rem;">Nível máximo: <strong>' +
+            currentReward.icon +
+            " " +
+            currentReward.name +
+            '</strong> 🎉</p></div><div class="progress-bar-container"><div class="progress-bar-fill" style="width:100%;">100% 🎉</div></div>';
         } else {
-          progressHTML = `
-                    <div class="total-points">
-                        <p>Você tem</p>
-                        <strong>🏅 ${totalPoints.toLocaleString("pt-BR")} pontos</strong>
-                    </div>
-                `;
+          progressHTML =
+            '<div class="total-points"><p>Você tem</p><strong>🏅 ' +
+            totalPoints.toLocaleString("pt-BR") +
+            " pontos</strong></div>";
         }
 
-        let rewardsListHTML =
+        var rewardsListHTML =
           '<h3 style="color:#2d5a27;margin-top:2rem;">📋 Todos os Níveis</h3>';
         if (activeRewards.length === 0) {
           rewardsListHTML +=
-            '<div class="no-rewards"><span style="font-size:4rem;">🏆</span><p>Nenhum programa de recompensas disponível.</p></div>';
+            '<div class="no-rewards"><span style="font-size:4rem;">🏆</span><p>Nenhum programa disponível.</p></div>';
         } else {
-          rewardsListHTML += activeRewards
-            .map((r) => {
-              const achieved = totalPoints >= r.minValue;
-              const alreadyRedeemed = userRedeemed.includes(r.id);
-              let actionButton = "";
-              if (achieved && !alreadyRedeemed) {
-                actionButton = `<button onclick="redeemReward('${r.id}', '${r.name}', ${r.minValue}, '${r.description.replace(/'/g, "\\'")}')" style="background:#2d5a27;color:white;border:none;padding:0.5rem 1rem;border-radius:20px;cursor:pointer;font-weight:bold;margin-top:0.5rem;">🎁 Resgatar</button>`;
-              } else if (achieved && alreadyRedeemed) {
-                actionButton = `<span style="background:#e0e0e0;color:#999;padding:0.5rem 1rem;border-radius:20px;font-size:0.85rem;">✅ Já resgatado</span>`;
-              }
-              return `
-                        <div class="reward-card ${achieved ? "achieved" : "locked"}">
-                            <div class="reward-icon">${r.icon}</div>
-                            <div class="reward-info">
-                                <h3 style="color:${r.color};">${r.name}</h3>
-                                <p>${r.description}</p>
-                                <p style="font-size:0.8rem;color:#999;">A partir de ${Math.floor(r.minValue).toLocaleString("pt-BR")} pontos</p>
-                                ${actionButton}
-                            </div>
-                            <span class="reward-badge ${achieved ? "badge-achieved" : "badge-locked"}">
-                                ${achieved ? "✅ Conquistado" : "🔒 Bloqueado"}
-                            </span>
-                        </div>
-                    `;
-            })
-            .join("");
+          activeRewards.forEach(function (r) {
+            var achieved = totalPoints >= r.minValue;
+            var alreadyRedeemed = userRedeemed.indexOf(r.id) >= 0;
+            var actionButton = "";
+            if (achieved && !alreadyRedeemed) {
+              actionButton =
+                "<button onclick=\"redeemReward('" +
+                r.id +
+                "','" +
+                r.name +
+                "'," +
+                r.minValue +
+                ",'" +
+                r.description.replace(/'/g, "\\'") +
+                '\')" style="background:#2d5a27;color:white;border:none;padding:0.5rem 1rem;border-radius:20px;cursor:pointer;font-weight:bold;margin-top:0.5rem;">🎁 Resgatar</button>';
+            } else if (achieved && alreadyRedeemed) {
+              actionButton =
+                '<span style="background:#e0e0e0;color:#999;padding:0.5rem 1rem;border-radius:20px;font-size:0.85rem;">✅ Já resgatado</span>';
+            }
+            rewardsListHTML +=
+              '<div class="reward-card ' +
+              (achieved ? "achieved" : "locked") +
+              '"><div class="reward-icon">' +
+              r.icon +
+              '</div><div class="reward-info"><h3 style="color:' +
+              r.color +
+              ';">' +
+              r.name +
+              "</h3><p>" +
+              r.description +
+              '</p><p style="font-size:0.8rem;color:#999;">A partir de ' +
+              Math.floor(r.minValue).toLocaleString("pt-BR") +
+              " pontos</p>" +
+              actionButton +
+              '</div><span class="reward-badge ' +
+              (achieved ? "badge-achieved" : "badge-locked") +
+              '">' +
+              (achieved ? "✅ Conquistado" : "🔒 Bloqueado") +
+              "</span></div>";
+          });
         }
 
         document.getElementById("rewardsContent").innerHTML =
           progressHTML + rewardsListHTML;
 
-        // Cupons disponíveis
-        const allCoupons =
+        var allCoupons =
           JSON.parse(localStorage.getItem("amazoniaCoupons")) || [];
-        const myCoupons = allCoupons.filter(
-          (c) =>
+        var myCoupons = allCoupons.filter(function (c) {
+          return (
             (c.assignedTo === "all" || c.assignedTo === user.email) &&
-            (!c.usedBy || !c.usedBy.includes(user.email)) &&
-            new Date(c.expiresAt) > new Date(),
-        );
+            (!c.usedBy || c.usedBy.indexOf(user.email) < 0) &&
+            new Date(c.expiresAt) > new Date()
+          );
+        });
 
-        let couponsHTML =
+        var couponsHTML =
           '<h3 style="color:#2d5a27;margin-top:2rem;">🎫 Meus Cupons Disponíveis</h3>';
         if (myCoupons.length === 0) {
           couponsHTML +=
-            '<div class="reward-card locked"><div class="reward-icon">🎫</div><div class="reward-info"><h3>Nenhum cupom disponível</h3><p style="color:#999;">Você ainda não tem cupons. Continue comprando e resgatando recompensas!</p></div></div>';
+            '<div class="reward-card locked"><div class="reward-icon">🎫</div><div class="reward-info"><h3>Nenhum cupom disponível</h3><p style="color:#999;">Continue comprando!</p></div></div>';
         } else {
-          couponsHTML += myCoupons
-            .map(
-              (c) => `
-                    <div class="reward-card achieved" style="border-left-color:#DAA520;background:#fffef5;">
-                        <div class="reward-icon">🎫</div>
-                        <div class="reward-info">
-                            <h3 style="color:#8B4513;">Cupom: <strong style="background:#2d5a27;color:white;padding:0.2rem 0.5rem;border-radius:5px;font-family:monospace;">${c.code}</strong></h3>
-                            <p style="font-size:1.2rem;font-weight:bold;color:#2d5a27;">${c.discount}% de desconto</p>
-                            <p style="font-size:0.8rem;color:#999;">Válido até ${new Date(c.expiresAt).toLocaleDateString("pt-BR")}</p>
-                            <p style="font-size:0.8rem;color:#666;">Use este código no carrinho de compras!</p>
-                        </div>
-                        <span style="background:#DAA520;color:white;padding:0.3rem 1rem;border-radius:20px;font-weight:bold;">Disponível</span>
-                    </div>
-                `,
-            )
-            .join("");
+          myCoupons.forEach(function (c) {
+            couponsHTML +=
+              '<div class="reward-card achieved" style="border-left-color:#DAA520;background:#fffef5;"><div class="reward-icon">🎫</div><div class="reward-info"><h3 style="color:#8B4513;">Cupom: <strong style="background:#2d5a27;color:white;padding:0.2rem 0.5rem;border-radius:5px;font-family:monospace;">' +
+              c.code +
+              '</strong></h3><p style="font-size:1.2rem;font-weight:bold;color:#2d5a27;">' +
+              c.discount +
+              '% de desconto</p><p style="font-size:0.8rem;color:#999;">Válido até ' +
+              new Date(c.expiresAt).toLocaleDateString("pt-BR") +
+              '</p></div><span style="background:#DAA520;color:white;padding:0.3rem 1rem;border-radius:20px;font-weight:bold;">Disponível</span></div>';
+          });
         }
 
         document.getElementById("myCouponsSection").innerHTML = couponsHTML;
       });
 
       function redeemReward(rewardId, rewardName, minValue, description) {
-        const user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
+        var user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
         if (!user) return;
-
         if (
           confirm(
-            `🎁 Resgatar recompensa: ${rewardName}?\n\n${description}\n\nUm cupom de desconto será gerado para você!`,
+            "🎁 Resgatar recompensa: " +
+              rewardName +
+              "?\n\n" +
+              description +
+              "\n\nUm cupom será gerado para você!",
           )
         ) {
-          const coupons =
+          var coupons =
             JSON.parse(localStorage.getItem("amazoniaCoupons")) || [];
-          const couponCode =
+          var couponCode =
             "RECOMPENSA" + Date.now().toString().slice(-6).toUpperCase();
-          const discountMatch = description.match(/(\d+)%/);
-          const discount = discountMatch ? parseInt(discountMatch[1]) : 10;
-
+          var discountMatch = description.match(/(\d+)%/);
+          var discount = discountMatch ? parseInt(discountMatch[1]) : 10;
           coupons.push({
             code: couponCode,
             discount: discount,
@@ -314,10 +336,8 @@
             usedBy: [],
             createdAt: new Date().toISOString(),
           });
-
           localStorage.setItem("amazoniaCoupons", JSON.stringify(coupons));
-
-          const redeemedRewards =
+          var redeemedRewards =
             JSON.parse(localStorage.getItem("amazoniaRedeemedRewards")) || [];
           redeemedRewards.push({
             userEmail: user.email,
@@ -329,13 +349,18 @@
             "amazoniaRedeemedRewards",
             JSON.stringify(redeemedRewards),
           );
-
           alert(
-            `🎉 Recompensa resgatada!\n\nSeu cupom: ${couponCode}\nDesconto: ${discount}%\n\nUse este código no carrinho de compras!\nVálido por 30 dias.`,
+            "🎉 Recompensa resgatada!\n\nCupom: " +
+              couponCode +
+              "\nDesconto: " +
+              discount +
+              "%\nVálido por 30 dias.",
           );
           location.reload();
         }
       }
     </script>
+
+    <script src="js/firebase-config.js"></script>
   </body>
 </html>

@@ -14,6 +14,10 @@
     />
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   </head>
   <body>
     <div id="offlineIndicator" class="offline-indicator"></div>
@@ -24,7 +28,7 @@
           <img
             src="imagem/logo.png.jpeg"
             alt="Amazônia em Casa"
-            style="height: 80px; width: auto"
+            style="height: 50px; width: auto"
             onerror="
               this.style.display = 'none';
               this.nextElementSibling.style.display = 'block';
@@ -61,15 +65,12 @@
           class="hero"
           style="display: flex; flex-direction: column; align-items: center"
         >
-          <!-- Logo centralizada em cima -->
           <img
             src="imagem/logo.png1.JPG"
             alt="Amazônia em Casa"
             style="width: 250px; height: auto; margin-bottom: 2rem"
             onerror="this.style.display = 'none'"
           />
-
-          <!-- Conteúdo em duas colunas -->
           <div
             style="
               display: grid;
@@ -126,8 +127,7 @@
               type="text"
               id="searchProduct"
               placeholder="Buscar produto..."
-            />
-            <i class="fas fa-search"></i>
+            /><i class="fas fa-search"></i>
           </div>
           <div class="category-filters">
             <button class="filter-btn active" data-category="all">Todos</button>
@@ -158,7 +158,6 @@
       >
         <h2>🌿 Rastreabilidade dos Produtos</h2>
         <p
-          class="section-description"
           style="
             text-align: center;
             color: #666;
@@ -168,11 +167,7 @@
         >
           Clique em um produto para conhecer sua origem
         </p>
-
-        <!-- Grid de produtos rastreáveis -->
         <div class="products-grid" id="trackingProductsList"></div>
-
-        <!-- Modal de detalhes -->
         <div
           id="trackingDetailModal"
           style="
@@ -223,7 +218,6 @@
       <section id="impact" class="section impact-section" style="display: none">
         <h2>🌳 O Impacto da Sua Compra</h2>
         <p
-          class="section-description"
           style="
             text-align: center;
             color: #666;
@@ -232,11 +226,8 @@
           "
         >
           Cada produto que você compra ajuda a preservar a Floresta Amazônica,
-          apoia famílias ribeirinhas e protege abelhas nativas. Veja o poder da
-          sua escolha:
+          apoia famílias ribeirinhas e protege abelhas nativas.
         </p>
-
-        <!-- Calculadora -->
         <div class="impact-calculator">
           <h3 style="text-align: center; color: #2d5a27">
             💰 Simule o valor da sua compra:
@@ -252,16 +243,12 @@
             />
             <span id="impactDisplay">R$ 150,00</span>
           </div>
-
           <div class="impact-results">
             <div class="impact-card">
               <span style="font-size: 3rem">🌳</span>
               <h4>Floresta Protegida</h4>
               <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
                 <span id="treesPreserved">1.50</span> ha
-              </p>
-              <p style="color: #666; font-size: 0.9rem">
-                de floresta em pé<br />preservados indiretamente
               </p>
             </div>
             <div class="impact-card">
@@ -270,9 +257,6 @@
               <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
                 <span id="familiesHelped">1</span>
               </p>
-              <p style="color: #666; font-size: 0.9rem">
-                família(s) ribeirinha(s)<br />diretamente beneficiada(s)
-              </p>
             </div>
             <div class="impact-card">
               <span style="font-size: 3rem">🐝</span>
@@ -280,14 +264,9 @@
               <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
                 <span id="beesSaved">3.000</span>
               </p>
-              <p style="color: #666; font-size: 0.9rem">
-                abelhas nativas sem ferrão<br />preservadas de agrotóxicos
-              </p>
             </div>
           </div>
         </div>
-
-        <!-- Texto persuasivo -->
         <div
           style="
             margin-top: 3rem;
@@ -312,7 +291,7 @@
               Cada frasco de mel, cada gota de óleo de copaíba ou andiroba
               representa o trabalho de
               <strong>famílias extrativistas</strong> que dependem da floresta
-              em pé para sobreviver. Ao comprar deles, você:
+              em pé para sobreviver.
             </p>
             <ul
               style="
@@ -322,10 +301,7 @@
                 padding-left: 1.5rem;
               "
             >
-              <li>
-                ✅ <strong>Combate o desmatamento</strong> — a floresta vale
-                mais em pé do que derrubada
-              </li>
+              <li>✅ <strong>Combate o desmatamento</strong></li>
               <li>
                 ✅ <strong>Gera renda digna</strong> para comunidades
                 tradicionais
@@ -360,13 +336,7 @@
               A <strong>Amazônia em Casa</strong> conecta você diretamente aos
               produtores da floresta, eliminando intermediários e garantindo que
               o <strong>valor justo</strong> chegue a quem realmente faz a
-              diferença: <strong>as comunidades tradicionais</strong>.
-            </p>
-            <p style="color: #555; line-height: 1.8; margin-top: 1rem">
-              Desde <strong>2020</strong>, já ajudamos a preservar mais de
-              <strong>1.000 hectares</strong> de floresta, apoiamos
-              <strong>50 famílias</strong> e protegemos
-              <strong>milhões de abelhas nativas</strong>.
+              diferença.
             </p>
             <a
               href="#products"
@@ -384,8 +354,6 @@
             >
           </div>
         </div>
-
-        <!-- Selos de confiança -->
         <div
           style="
             margin-top: 3rem;
@@ -404,10 +372,7 @@
             "
           >
             <span style="font-size: 2.5rem">🔬</span>
-            <h4 style="color: #2d5a27; margin: 0.5rem 0">100% Natural</h4>
-            <p style="color: #666; font-size: 0.9rem">
-              Produtos sem aditivos químicos, direto da natureza
-            </p>
+            <h4 style="color: #2d5a27">100% Natural</h4>
           </div>
           <div
             style="
@@ -418,12 +383,7 @@
             "
           >
             <span style="font-size: 2.5rem">📍</span>
-            <h4 style="color: #2d5a27; margin: 0.5rem 0">
-              Rastreabilidade Total
-            </h4>
-            <p style="color: #666; font-size: 0.9rem">
-              Você sabe exatamente de onde vem cada produto
-            </p>
+            <h4 style="color: #2d5a27">Rastreabilidade Total</h4>
           </div>
           <div
             style="
@@ -434,33 +394,25 @@
             "
           >
             <span style="font-size: 2.5rem">🤝</span>
-            <h4 style="color: #2d5a27; margin: 0.5rem 0">Comércio Justo</h4>
-            <p style="color: #666; font-size: 0.9rem">
-              Pagamento digno para comunidades tradicionais
-            </p>
+            <h4 style="color: #2d5a27">Comércio Justo</h4>
           </div>
         </div>
       </section>
-
       <section
         id="contact"
         class="section contact-section"
         style="display: none"
       >
         <h2>💬 Deixe seu Feedback</h2>
-
         <div class="contact-container">
           <div class="contact-info" id="contactInfo">
             <h3>Amazônia em Casa</h3>
             <p><i class="fas fa-map-marker-alt"></i> Endereço aqui</p>
             <p><i class="fas fa-phone"></i> (91) 00000-0000</p>
             <p><i class="fas fa-clock"></i> Horário aqui</p>
-
-            <!-- Redes sociais -->
             <div style="display: flex; gap: 12px; margin-top: 15px">
-              <!-- Instagram -->
               <a
-                href="https://instagram.com/seuinstagram"
+                href="https://instagram.com/"
                 target="_blank"
                 style="
                   background: #e4405f;
@@ -472,22 +424,10 @@
                   justify-content: center;
                   text-decoration: none;
                 "
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 448 512"
-                  width="20"
-                  height="20"
-                  fill="white"
-                >
-                  <path
-                    d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"
-                  />
-                </svg>
-              </a>
-              <!-- Facebook -->
+                ><i class="fab fa-instagram" style="color: white"></i
+              ></a>
               <a
-                href="https://facebook.com/seufacebook"
+                href="https://facebook.com/"
                 target="_blank"
                 style="
                   background: #1877f2;
@@ -499,14 +439,10 @@
                   justify-content: center;
                   text-decoration: none;
                 "
-              >
-                <span style="color: white; font-size: 20px; font-weight: bold"
-                  >f</span
-                >
-              </a>
-              <!-- WhatsApp -->
+                ><i class="fab fa-facebook-f" style="color: white"></i
+              ></a>
               <a
-                href="https://wa.me/seuwhatsapp"
+                href="https://wa.me/"
                 target="_blank"
                 style="
                   background: #25d366;
@@ -518,22 +454,10 @@
                   justify-content: center;
                   text-decoration: none;
                 "
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 448 512"
-                  width="20"
-                  height="20"
-                  fill="white"
-                >
-                  <path
-                    d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"
-                  />
-                </svg>
-              </a>
+                ><i class="fab fa-whatsapp" style="color: white"></i
+              ></a>
             </div>
           </div>
-
           <form class="contact-form" id="contactForm">
             <p
               style="
@@ -560,7 +484,7 @@
             />
             <textarea
               id="contactMessage"
-              placeholder="Sua mensagem, sugestão ou opinião..."
+              placeholder="Sua mensagem..."
               rows="5"
               required
             ></textarea>
@@ -581,11 +505,12 @@
         <div class="footer-section">
           <h4>Links</h4>
           <ul>
+            <li><a href="#home">Início</a></li>
             <li><a href="#products">Produtos</a></li>
+            <li><a href="#about">Sobre</a></li>
             <li><a href="#tracking">Rastreabilidade</a></li>
             <li><a href="#impact">Impacto</a></li>
             <li><a href="#contact">Contato</a></li>
-            <li><a href="#about">Sobre</a></li>
           </ul>
         </div>
         <div class="footer-section">
@@ -607,7 +532,6 @@
       </div>
     </footer>
 
-    <!-- Carrinho -->
     <div class="cart-sidebar" id="cartSidebar">
       <div class="cart-header">
         <h3>🛒 Carrinho</h3>
@@ -622,24 +546,17 @@
         style="display: none; padding: 0 1.5rem"
       >
         <div class="coupon-input-group">
-          <input type="text" id="couponCode" placeholder="Código do cupom" />
-          <button class="btn btn-secondary btn-sm" id="applyCouponBtn">
+          <input
+            type="text"
+            id="couponCode"
+            placeholder="Código do cupom"
+          /><button class="btn btn-secondary btn-sm" id="applyCouponBtn">
             Aplicar
           </button>
         </div>
         <p id="couponMessage" style="font-size: 0.8rem; margin-top: 0.3rem"></p>
       </div>
       <div class="cart-footer" id="cartFooter" style="display: none">
-        <div class="cart-total">
-          <span>Subtotal:</span><span id="cartSubtotal">R$ 0,00</span>
-        </div>
-        <div
-          class="cart-total"
-          id="cartDiscountRow"
-          style="display: none; color: #2d5a27"
-        >
-          <span>Desconto:</span><span id="cartDiscount">-R$ 0,00</span>
-        </div>
         <div class="cart-total">
           <span>Total:</span><span id="cartTotal">R$ 0,00</span>
         </div>
@@ -655,499 +572,179 @@
     </div>
     <div class="cart-overlay" id="cartOverlay"></div>
 
-    <!-- Modal Checkout -->
-    <!-- Modal Checkout -->
     <div id="checkoutModal" class="modal">
       <div class="modal-content modal-checkout">
         <span class="close-modal" id="closeCheckoutModal">&times;</span>
         <h2>💳 Finalizar Pedido</h2>
-
-        <div class="checkout-steps">
-          <!-- Resumo -->
-          <div
-            id="checkoutSummary"
-            style="
-              background: #f4f1ea;
-              padding: 1rem;
-              border-radius: 10px;
-              margin-bottom: 1.5rem;
-            "
-          ></div>
-
-          <!-- Endereço -->
-          <h4>📍 Endereço de Entrega</h4>
+        <div
+          id="checkoutSummary"
+          style="
+            background: #f4f1ea;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+          "
+        ></div>
+        <h4>📍 Endereço de Entrega</h4>
+        <div class="form-group">
+          <label>Endereço *</label
+          ><input
+            type="text"
+            id="checkoutAddress"
+            class="form-input"
+            placeholder="Rua, número, bairro"
+          />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
           <div class="form-group">
-            <label>Endereço *</label>
-            <input
+            <label>Cidade *</label
+            ><input
               type="text"
-              id="checkoutAddress"
+              id="checkoutCity"
               class="form-input"
-              placeholder="Rua, número, bairro"
+              value="Belém"
             />
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
-            <div class="form-group">
-              <label>Cidade *</label>
-              <input
-                type="text"
-                id="checkoutCity"
-                class="form-input"
-                value="Belém"
-              />
-            </div>
-            <div class="form-group">
-              <label>CEP</label>
-              <input
-                type="text"
-                id="checkoutCep"
-                class="form-input"
-                placeholder="66000-000"
-              />
-            </div>
+          <div class="form-group">
+            <label>CEP</label
+            ><input
+              type="text"
+              id="checkoutCep"
+              class="form-input"
+              placeholder="66000-000"
+            />
           </div>
-
-          <!-- Frete -->
-          <!-- Frete -->
-          <h4 style="margin-top: 1.5rem">🚚 Tipo de Entrega</h4>
-          <div class="shipping-options">
-            <label class="payment-option">
-              <input
-                type="radio"
-                name="shipping"
-                value="same_day"
-                checked
-                onchange="updateCheckoutTotal()"
-              />
-              <span class="payment-label">🛵 Entrega Rápida</span>
-              <span class="payment-discount" id="expressCost"
-                >Calculando...</span
-              >
-            </label>
-            <label class="payment-option">
-              <input type="radio" name="shipping" value="normal" />
-              <span class="payment-label">📦 Entrega Normal</span>
-              <span class="payment-discount" id="normalCost"
-                >Calculando...</span
-              >
-            </label>
-            <label class="payment-option">
-              <input
-                type="radio"
-                name="shipping"
-                value="pickup"
-                onchange="updateCheckoutTotal()"
-              />
-              <span class="payment-label">🏪 Retirar na Loja</span>
-              <span
-                class="payment-discount"
-                style="background: #e8f5e9; color: #2d5a27"
-                >Grátis</span
-              >
-            </label>
-          </div>
-          <div
-            id="shippingDetails"
-            style="
-              background: #f9f9f9;
-              padding: 0.8rem;
-              border-radius: 10px;
-              font-size: 0.9rem;
-              margin-top: 0.5rem;
-            "
-          >
-            <p>📍 <strong>Belém e região metropolitana</strong></p>
-            <p style="color: #999">
-              Frete calculado pelo aplicativo de entrega
-            </p>
-            <p id="shippingMessage" style="color: #e65100; font-size: 0.85rem">
-              ⏳ Calculando valor do frete...
-            </p>
-          </div>
-
-          <!-- Forma de Pagamento -->
-          <h4 style="margin-top: 1.5rem">💳 Forma de Pagamento</h4>
-
-          <!-- Tabs de pagamento -->
-          <div class="payment-tabs">
-            <button class="payment-tab active" onclick="showPaymentTab('pix')">
-              📱 Pix
-            </button>
-            <button class="payment-tab" onclick="showPaymentTab('credit')">
-              💳 Crédito
-            </button>
-            <button class="payment-tab" onclick="showPaymentTab('debit')">
-              🏦 Débito
-            </button>
-            <button class="payment-tab" onclick="showPaymentTab('boleto')">
-              🔗 Boleto
-            </button>
-            <button class="payment-tab" onclick="showPaymentTab('combined')">
-              🔄 Combinar
-            </button>
-            <button class="payment-tab" onclick="showPaymentTab('twocards')">
-              💳💳 2 Cartões
-            </button>
-          </div>
-
-          <!-- Painel Pix -->
-          <div id="paymentPanel_pix" class="payment-panel active">
-            <div class="payment-info-box">
-              <p><strong>📱 Pagamento via Pix</strong></p>
-              <p style="color: #2d5a27">
-                ✅ <strong>5% de desconto</strong> no Pix
-              </p>
-              <p style="color: #999; font-size: 0.85rem">
-                Pagamento instantâneo, aprovado na hora.
-              </p>
-            </div>
-          </div>
-
-          <!-- Painel Crédito -->
-          <div id="paymentPanel_credit" class="payment-panel">
-            <div class="form-group">
-              <label>Número do Cartão</label>
-              <input
-                type="text"
-                class="form-input card-input"
-                placeholder="0000 0000 0000 0000"
-                maxlength="19"
-                oninput="
-                  this.value = PaymentSystem.formatCardNumber(this.value)
-                "
-              />
-            </div>
-            <div
-              style="
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 1rem;
-              "
-            >
-              <div class="form-group">
-                <label>Validade</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="MM/AA"
-                  maxlength="5"
-                  oninput="this.value = PaymentSystem.formatExpiry(this.value)"
-                />
-              </div>
-              <div class="form-group">
-                <label>CVV</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="123"
-                  maxlength="4"
-                  oninput="this.value = PaymentSystem.formatCVV(this.value)"
-                  type="password"
-                />
-              </div>
-              <div class="form-group">
-                <label>Parcelas</label>
-                <select class="form-input" id="creditInstallments">
-                  <option value="1">1x sem juros</option>
-                  <option value="2">2x sem juros</option>
-                  <option value="3">3x sem juros</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Nome no Cartão</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="Como está no cartão"
-              />
-            </div>
-            <div class="form-group">
-              <label>CPF do Titular</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="000.000.000-00"
-              />
-            </div>
-          </div>
-
-          <!-- Painel Débito -->
-          <div id="paymentPanel_debit" class="payment-panel">
-            <div class="form-group">
-              <label>Número do Cartão</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="0000 0000 0000 0000"
-                maxlength="19"
-                oninput="
-                  this.value = PaymentSystem.formatCardNumber(this.value)
-                "
-              />
-            </div>
-            <div
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
-            >
-              <div class="form-group">
-                <label>Validade</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="MM/AA"
-                  maxlength="5"
-                  oninput="this.value = PaymentSystem.formatExpiry(this.value)"
-                />
-              </div>
-              <div class="form-group">
-                <label>CVV</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="123"
-                  maxlength="4"
-                  type="password"
-                />
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Nome no Cartão</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="Como está no cartão"
-              />
-            </div>
-          </div>
-
-          <!-- Painel Boleto -->
-          <div id="paymentPanel_boleto" class="payment-panel">
-            <div class="payment-info-box">
-              <p><strong>🔗 Boleto Bancário</strong></p>
-              <p style="color: #999; font-size: 0.85rem">
-                Vencimento em 3 dias úteis. O pedido é processado após
-                confirmação do pagamento.
-              </p>
-            </div>
-          </div>
-
-          <!-- Painel Combinado (Pix + Cartão) -->
-          <div id="paymentPanel_combined" class="payment-panel">
-            <p style="margin-bottom: 1rem">
-              💡 Divida o pagamento entre
-              <strong>Pix e Cartão de Crédito</strong>
-            </p>
-            <div
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
-            >
-              <div class="form-group">
-                <label>Valor no Pix</label>
-                <input
-                  type="number"
-                  class="form-input"
-                  id="combinedPixAmount"
-                  placeholder="R$ 0,00"
-                  step="0.01"
-                  oninput="updateCombinedTotal()"
-                />
-              </div>
-              <div class="form-group">
-                <label>Valor no Cartão</label>
-                <input
-                  type="number"
-                  class="form-input"
-                  id="combinedCardAmount"
-                  placeholder="R$ 0,00"
-                  step="0.01"
-                  oninput="updateCombinedTotal()"
-                  readonly
-                  style="background: #f5f5f5"
-                />
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Número do Cartão</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="0000 0000 0000 0000"
-                maxlength="19"
-                oninput="
-                  this.value = PaymentSystem.formatCardNumber(this.value)
-                "
-              />
-            </div>
-            <div
-              style="
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 1rem;
-              "
-            >
-              <div class="form-group">
-                <label>Validade</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="MM/AA"
-                  maxlength="5"
-                />
-              </div>
-              <div class="form-group">
-                <label>CVV</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="123"
-                  maxlength="4"
-                />
-              </div>
-              <div class="form-group">
-                <label>Parcelas</label>
-                <select class="form-input">
-                  <option value="1">1x</option>
-                  <option value="2">2x</option>
-                  <option value="3">3x</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Nome no Cartão</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="Como está no cartão"
-              />
-            </div>
-          </div>
-
-          <!-- Painel 2 Cartões -->
-          <div id="paymentPanel_twocards" class="payment-panel">
-            <p style="margin-bottom: 1rem">
-              💡 Divida o pagamento entre
-              <strong>dois cartões de crédito</strong>
-            </p>
-
-            <h5 style="color: #2d5a27; margin-bottom: 0.5rem">💳 Cartão 1</h5>
-            <div class="form-group">
-              <label>Valor no Cartão 1</label>
-              <input
-                type="number"
-                class="form-input"
-                id="card1Amount"
-                placeholder="R$ 0,00"
-                step="0.01"
-                oninput="updateTwoCardsTotal()"
-              />
-            </div>
-            <div class="form-group">
-              <label>Número do Cartão</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="0000 0000 0000 0000"
-                maxlength="19"
-                oninput="
-                  this.value = PaymentSystem.formatCardNumber(this.value)
-                "
-              />
-            </div>
-            <div
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
-            >
-              <div class="form-group">
-                <label>Validade</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="MM/AA"
-                  maxlength="5"
-                />
-              </div>
-              <div class="form-group">
-                <label>CVV</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="123"
-                  maxlength="4"
-                />
-              </div>
-            </div>
-
-            <h5 style="color: #2d5a27; margin: 1rem 0 0.5rem">💳 Cartão 2</h5>
-            <div class="form-group">
-              <label>Valor no Cartão 2</label>
-              <input
-                type="number"
-                class="form-input"
-                id="card2Amount"
-                placeholder="R$ 0,00"
-                step="0.01"
-                oninput="updateTwoCardsTotal()"
-                readonly
-                style="background: #f5f5f5"
-              />
-            </div>
-            <div class="form-group">
-              <label>Número do Cartão</label>
-              <input
-                type="text"
-                class="form-input"
-                placeholder="0000 0000 0000 0000"
-                maxlength="19"
-                oninput="
-                  this.value = PaymentSystem.formatCardNumber(this.value)
-                "
-              />
-            </div>
-            <div
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
-            >
-              <div class="form-group">
-                <label>Validade</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="MM/AA"
-                  maxlength="5"
-                />
-              </div>
-              <div class="form-group">
-                <label>CVV</label>
-                <input
-                  type="text"
-                  class="form-input"
-                  placeholder="123"
-                  maxlength="4"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Botão Confirmar -->
-          <button
-            class="btn btn-primary btn-block"
-            id="confirmOrderBtn"
-            style="
-              width: 100%;
-              padding: 1rem;
-              margin-top: 1.5rem;
-              font-size: 1.2rem;
-            "
-          >
-            ✅ Confirmar Pedido
-          </button>
         </div>
+        <h4 style="margin-top: 1.5rem">🚚 Tipo de Entrega</h4>
+        <div class="shipping-options">
+          <label class="payment-option"
+            ><input
+              type="radio"
+              name="shipping"
+              value="same_day"
+              checked
+              onchange="updateCheckoutTotal()"
+            /><span class="payment-label">🛵 Entrega Rápida</span
+            ><span class="payment-discount">R$ 12,90</span></label
+          >
+          <label class="payment-option"
+            ><input
+              type="radio"
+              name="shipping"
+              value="next_day"
+              onchange="updateCheckoutTotal()"
+            /><span class="payment-label">📦 Entrega Normal</span
+            ><span class="payment-discount">R$ 8,90</span></label
+          >
+          <label class="payment-option"
+            ><input
+              type="radio"
+              name="shipping"
+              value="pickup"
+              onchange="updateCheckoutTotal()"
+            /><span class="payment-label">🏪 Retirar na Loja</span
+            ><span
+              class="payment-discount"
+              style="background: #e8f5e9; color: #2d5a27"
+              >Grátis</span
+            ></label
+          >
+        </div>
+        <h4 style="margin-top:1.5rem;">💳 Forma de Pagamento</h4>
+
+<div class="payment-tabs">
+    <button class="payment-tab active" onclick="showPaymentTab('pix')">📱 Pix</button>
+    <button class="payment-tab" onclick="showPaymentTab('credit')">💳 Crédito</button>
+    <button class="payment-tab" onclick="showPaymentTab('debit')">🏦 Débito</button>
+    <button class="payment-tab" onclick="showPaymentTab('boleto')">🔗 Boleto</button>
+    <button class="payment-tab" onclick="showPaymentTab('combined')">🔄 Combinar</button>
+    <button class="payment-tab" onclick="showPaymentTab('twocards')">💳💳 2 Cartões</button>
+</div>
+
+<!-- Painel Pix -->
+<div id="paymentPanel_pix" class="payment-panel active">
+    <div class="payment-info-box">
+        <p><strong>📱 Pagamento via Pix</strong></p>
+        <p style="color:#2d5a27;">✅ <strong>5% de desconto</strong> no Pix</p>
+        <p style="color:#999;font-size:0.85rem;">Pagamento instantâneo, aprovado na hora.</p>
+    </div>
+</div>
+
+<!-- Painel Crédito -->
+<div id="paymentPanel_credit" class="payment-panel" style="display:none;">
+    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
+        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
+        <div class="form-group"><label>Parcelas</label><select class="form-input" id="creditInstallments"><option value="1">1x sem juros</option><option value="2">2x sem juros</option><option value="3">3x sem juros</option></select></div>
+    </div>
+    <div class="form-group"><label>Nome no Cartão</label><input type="text" class="form-input" placeholder="Como está no cartão"></div>
+    <div class="form-group"><label>CPF do Titular</label><input type="text" class="form-input" placeholder="000.000.000-00"></div>
+</div>
+
+<!-- Painel Débito -->
+<div id="paymentPanel_debit" class="payment-panel" style="display:none;">
+    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
+        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
+    </div>
+    <div class="form-group"><label>Nome no Cartão</label><input type="text" class="form-input" placeholder="Como está no cartão"></div>
+</div>
+
+<!-- Painel Boleto -->
+<div id="paymentPanel_boleto" class="payment-panel" style="display:none;">
+    <div class="payment-info-box">
+        <p><strong>🔗 Boleto Bancário</strong></p>
+        <p style="color:#999;font-size:0.85rem;">Vencimento em 3 dias úteis. O pedido é processado após confirmação do pagamento.</p>
+    </div>
+</div>
+
+<!-- Painel Combinar -->
+<div id="paymentPanel_combined" class="payment-panel" style="display:none;">
+    <p style="margin-bottom:1rem;">💡 Divida o pagamento entre <strong>Pix e Cartão de Crédito</strong></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>Valor no Pix</label><input type="number" class="form-input" id="combinedPixAmount" placeholder="R$ 0,00" step="0.01" oninput="updateCombinedTotal()"></div>
+        <div class="form-group"><label>Valor no Cartão</label><input type="number" class="form-input" id="combinedCardAmount" placeholder="R$ 0,00" readonly style="background:#f5f5f5;"></div>
+    </div>
+    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
+        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
+        <div class="form-group"><label>Parcelas</label><select class="form-input"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option></select></div>
+    </div>
+    <div class="form-group"><label>Nome no Cartão</label><input type="text" class="form-input" placeholder="Como está no cartão"></div>
+</div>
+
+<!-- Painel 2 Cartões -->
+<div id="paymentPanel_twocards" class="payment-panel" style="display:none;">
+    <p style="margin-bottom:1rem;">💡 Divida o pagamento entre <strong>dois cartões de crédito</strong></p>
+    <h5 style="color:#2d5a27;margin-bottom:0.5rem;">💳 Cartão 1</h5>
+    <div class="form-group"><label>Valor no Cartão 1</label><input type="number" class="form-input" id="card1Amount" placeholder="R$ 0,00" step="0.01" oninput="updateTwoCardsTotal()"></div>
+    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
+        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
+    </div>
+    <h5 style="color:#2d5a27;margin:1rem 0 0.5rem;">💳 Cartão 2</h5>
+    <div class="form-group"><label>Valor no Cartão 2</label><input type="number" class="form-input" id="card2Amount" placeholder="R$ 0,00" readonly style="background:#f5f5f5;"></div>
+    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
+        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
+    </div>
+</div>
+
+<button class="btn btn-primary" id="confirmOrderBtn" onclick="confirmOrder()" style="width:100%;padding:1rem;margin-top:1.5rem;font-size:1.2rem;">✅ Confirmar Pedido</button>
       </div>
     </div>
 
-    <!-- Chatbot -->
     <div class="chatbot-container">
       <button class="chatbot-toggle" id="chatbotToggle">💬</button>
       <div class="chatbot-window" id="chatbotWindow" style="display: none">
         <div class="chatbot-header">
           <h4>🌿 Assistente</h4>
-          <button id="chatbotClose" class="chatbot-close">&times;</button>
+          <button id="chatbotClose">&times;</button>
         </div>
         <div class="chatbot-messages" id="chatbotMessages">
           <div class="message bot"><p>Olá! Como posso ajudar? 🌿</p></div>
@@ -1163,10 +760,8 @@
     </div>
 
     <script src="js/app.js"></script>
-    <script src="js/cart.js"></script>
     <script src="js/chatbot.js"></script>
     <script src="js/tracker.js"></script>
-    <script src="js/freight.js"></script>
     <script src="js/payment.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
@@ -1175,38 +770,7 @@
         });
       }
     </script>
-    <script>
-      async function pagarPix() {
-        const res = await fetch("/checkout/pix", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nome: "Cliente Teste",
-            email: "teste@cliente.com",
-            produto: "Camisa",
-            valor: 5990,
-          }),
-        });
-        const data = await res.json();
-        console.log("PIX:", data);
-        alert("Pedido PIX criado! Veja o console para detalhes.");
-      }
 
-      async function pagarCartao() {
-        const res = await fetch("/checkout/cartao", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nome: "Cliente Teste",
-            email: "teste@cliente.com",
-            produto: "Camisa",
-            valor: 5990,
-          }),
-        });
-        const data = await res.json();
-        console.log("Cartão:", data);
-        alert("Pedido Cartão criado! Veja o console para detalhes.");
-      }
-    </script>
+    <script src="js/firebase-config.js"></script>
   </body>
 </html>

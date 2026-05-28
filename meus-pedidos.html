@@ -44,7 +44,6 @@
         padding: 0.3rem 1rem;
         border-radius: 20px;
         font-size: 0.9rem;
-        font-weight: 500;
       }
       .status-pending {
         background: #fff3e0;
@@ -66,7 +65,6 @@
         background: #fce4ec;
         color: #c62828;
       }
-
       .order-items {
         margin: 1rem 0;
       }
@@ -83,115 +81,10 @@
         padding-top: 1rem;
         border-top: 2px solid #eee;
       }
-
-      /* Seção de rastreamento */
-      .tracking-section {
-        background: #f9f9f9;
-        border-radius: 10px;
-        padding: 1rem;
-        margin-top: 1rem;
-      }
-      .tracking-title {
-        font-weight: bold;
-        color: #2d5a27;
-        margin-bottom: 0.5rem;
-      }
-      .tracking-code {
-        background: #2d5a27;
-        color: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 5px;
-        font-family: monospace;
-        display: inline-block;
-      }
-      .tracking-link {
-        display: inline-block;
-        margin-top: 0.5rem;
-        background: #1565c0;
-        color: white;
-        padding: 0.5rem 1.5rem;
-        border-radius: 25px;
-        text-decoration: none;
-        font-weight: 500;
-      }
-      .tracking-link:hover {
-        background: #0d47a1;
-      }
-
-      /* Mapa */
-      .map-container {
-        width: 100%;
-        height: 250px;
-        background: #e0e0e0;
-        border-radius: 10px;
-        margin-top: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #999;
-      }
-      .map-active {
-        background: #c8e6c9;
-        color: #2d5a27;
-      }
-
-      .delivery-progress {
-        display: flex;
-        justify-content: space-between;
-        margin: 1.5rem 0;
-        position: relative;
-      }
-      .progress-step {
-        text-align: center;
-        flex: 1;
-        position: relative;
-        z-index: 1;
-      }
-      .step-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #e0e0e0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 0.5rem;
-        font-size: 1.2rem;
-      }
-      .step-icon.active {
-        background: #2d5a27;
-        color: white;
-      }
-      .step-label {
-        font-size: 0.8rem;
-        color: #999;
-      }
-      .step-label.active {
-        color: #2d5a27;
-        font-weight: bold;
-      }
-      .progress-line {
-        position: absolute;
-        top: 20px;
-        left: 50%;
-        right: -50%;
-        height: 3px;
-        background: #e0e0e0;
-        z-index: 0;
-      }
-      .progress-line.active {
-        background: #2d5a27;
-      }
-
       .no-orders {
         text-align: center;
         padding: 3rem;
         color: #999;
-      }
-      .no-orders span {
-        font-size: 4rem;
-        display: block;
-        margin-bottom: 1rem;
       }
       .btn-back {
         display: inline-block;
@@ -203,6 +96,10 @@
         text-decoration: none;
       }
     </style>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   </head>
   <body>
     <header class="header">
@@ -223,259 +120,136 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
-
+      document.addEventListener("DOMContentLoaded", async function () {
+        var user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
         if (!user) {
-          document.getElementById("ordersList").innerHTML = `
-                    <div class="no-orders">
-                        <span>🔒</span>
-                        <p>Faça login para ver seus pedidos.</p>
-                        <a href="cadastro.html" class="btn-back">Entrar / Cadastrar</a>
-                    </div>
-                `;
+          document.getElementById("ordersList").innerHTML =
+            '<div class="no-orders"><span>🔒</span><p>Faça login para ver seus pedidos.</p><a href="cadastro.html" class="btn-back">Entrar / Cadastrar</a></div>';
           return;
         }
 
-        const allOrders =
-          JSON.parse(localStorage.getItem("amazoniaOrders")) || [];
-        const myOrders = allOrders
-          .filter((o) => o.customer?.email === user.email)
-          .reverse();
+        var myOrders = [];
+
+        // Buscar do Firebase primeiro
+        if (typeof db !== "undefined") {
+          try {
+            var snap = await db
+              .collection("orders")
+              .where("customer.email", "==", user.email)
+              .orderBy("date", "desc")
+              .get();
+            snap.forEach(function (doc) {
+              myOrders.push({ id: doc.id, ...doc.data() });
+            });
+          } catch (e) {
+            console.log("Firebase offline, usando localStorage");
+          }
+        }
+
+        // Se não achou no Firebase, buscar do localStorage
+        if (myOrders.length === 0) {
+          var allOrders =
+            JSON.parse(localStorage.getItem("amazoniaOrders")) || [];
+          myOrders = allOrders
+            .filter(function (o) {
+              return o.customer?.email === user.email;
+            })
+            .reverse();
+        }
 
         if (myOrders.length === 0) {
-          document.getElementById("ordersList").innerHTML = `
-                    <div class="no-orders">
-                        <span>📦</span>
-                        <p>Você ainda não tem pedidos.</p>
-                        <a href="index.html" class="btn-back">Fazer primeira compra</a>
-                    </div>
-                `;
+          document.getElementById("ordersList").innerHTML =
+            '<div class="no-orders"><span>📦</span><p>Você ainda não tem pedidos.</p><a href="index.html" class="btn-back">Fazer primeira compra</a></div>';
           return;
         }
 
-        /* ============================================
-               API DE ENTREGA - CONFIGURAÇÃO
-               ============================================
-               Substitua os valores abaixo pelas suas
-               credenciais quando contratar o serviço:
-               
-               API_PROVIDER: 'ifood', 'loggi', 'uber', '99', 'custom'
-               API_KEY: sua chave de API
-               API_URL: URL base da API
-               ============================================ */
-        const API_CONFIG = {
-          provider: "custom", // ⚠️ MUDAR: 'ifood', 'loggi', 'uber', '99', 'custom'
-          apiKey: "SUA_CHAVE_API_AQUI", // ⚠️ MUDAR: Cole sua chave da API aqui
-          apiUrl: "https://api.exemplo.com/v1/", // ⚠️ MUDAR: Cole a URL da API aqui
-          trackingUrl: "https://rastreio.exemplo.com/", // ⚠️ MUDAR: URL de rastreamento
-        };
+        function getStatusName(s) {
+          var n = {
+            pending: "⏳ Pendente",
+            confirmed: "✅ Confirmado",
+            shipped: "🚚 Em Entrega",
+            delivered: "📦 Entregue",
+            cancelled: "❌ Cancelado",
+          };
+          return n[s] || s;
+        }
 
         document.getElementById("ordersList").innerHTML = myOrders
-          .map((order) => {
-            const statusClass = getStatusClass(order.status);
-            const statusName = getStatusName(order.status);
-            const progressHTML = createProgressBar(order.status);
-
-            // Verificar se tem código de rastreio
-            const trackingCode = order.trackingCode || "";
-            const trackingHTML = trackingCode
-              ? `
-                    <div class="tracking-section">
-                        <p class="tracking-title">🚚 Rastreamento da Entrega</p>
-                        <p>Código: <span class="tracking-code">${trackingCode}</span></p>
-                        <a href="${API_CONFIG.trackingUrl}${trackingCode}" target="_blank" class="tracking-link">
-                            📍 Acompanhar no Mapa
-                        </a>
-                        <div class="map-container ${order.status === "shipped" ? "map-active" : ""}">
-                            ${order.status === "shipped" ? "📍 Entregador a caminho..." : "🗺️ Mapa disponível quando a entrega iniciar"}
-                        </div>
-                    </div>
-                `
-              : order.status === "shipped"
-                ? `
-                    <div class="tracking-section">
-                        <p class="tracking-title">🚚 Entrega em Andamento</p>
-                        <p style="color:#999;">Aguardando código de rastreio...</p>
-                        <div class="map-container map-active">📍 Entregador a caminho...</div>
-                    </div>
-                `
-                : "";
-
-            return `
-                    <div class="order-card">
-                        <div class="order-header">
-                            <div>
-                                <span class="order-id">Pedido #${order.id}</span>
-                                <span class="order-date">${new Date(order.date).toLocaleDateString("pt-BR")} às ${new Date(order.date).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
-                            </div>
-                            <span class="order-status status-${order.status}">${statusName}</span>
-                        </div>
-                        
-                        ${progressHTML}
-                        
-                        <div class="order-items">
-                            ${
-                              order.items
-                                ?.map(
-                                  (item) => `
-                                <div class="order-item">
-                                    <span>${item.name} (${item.quantity}x)</span>
-                                    <span>R$ ${(item.price * item.quantity).toFixed(2)}</span>
-                                </div>
-                            `,
-                                )
-                                .join("") || ""
-                            }
-                        </div>
-                        
-                        ${
-                          order.discount > 0
-                            ? `
-                            <div class="order-item">
-                                <span style="color:#2d5a27;">Desconto ${order.couponUsed ? "(" + order.couponUsed + ")" : ""}</span>
-                                <span style="color:#2d5a27;">-R$ ${order.discount.toFixed(2)}</span>
-                            </div>
-                        `
-                            : ""
-                        }
-                        
-                        <div class="order-total">
-                            Total: R$ ${(order.total || 0).toFixed(2)}
-                        </div>
-                        
-                        <div style="margin-top:0.5rem; font-size:0.9rem; color:#999;">
-                            💳 Pagamento: ${getPaymentName(order.payment?.method)}
-                            ${order.shipping?.address ? " | 📍 " + order.shipping.address : ""}
-                        </div>
-                        
-                        ${trackingHTML}
-
-${
-  order.status === "pending" || order.status === "confirmed"
-    ? `
-    <div style="margin-top:1rem;text-align:right;">
-        <button onclick="cancelOrderClient(${order.id})" style="background:#c62828;color:white;border:none;padding:0.5rem 1.5rem;border-radius:25px;cursor:pointer;font-size:0.9rem;">
-            ❌ Cancelar Pedido
-        </button>
-    </div>
-`
-    : ""
-}
-
-${
-  order.status === "cancelled"
-    ? `
-    <div style="margin-top:1rem;padding:1rem;background:#fce4ec;border-radius:10px;">
-        <p style="color:#c62828;font-weight:bold;">❌ Pedido Cancelado</p>
-        <p style="font-size:0.9rem;color:#666;">Motivo: ${order.cancelledReason || "Não informado"}</p>
-        <p style="font-size:0.8rem;color:#999;">Cancelado em: ${new Date(order.cancelledAt).toLocaleString("pt-BR")}</p>
-    </div>
-`
-    : ""
-}
-                    </div>
-                `;
+          .map(function (order) {
+            return (
+              '<div class="order-card">' +
+              '<div class="order-header"><div><span class="order-id">Pedido #' +
+              (order.orderNumber || order.id) +
+              '</span><span class="order-date"> ' +
+              new Date(order.date).toLocaleDateString("pt-BR") +
+              "</span></div>" +
+              '<span class="order-status status-' +
+              (order.status || "pending") +
+              '">' +
+              getStatusName(order.status || "pending") +
+              "</span></div>" +
+              '<div class="order-items">' +
+              (order.items || [])
+                .map(function (item) {
+                  return (
+                    '<div class="order-item"><span>' +
+                    item.name +
+                    " (" +
+                    item.quantity +
+                    "x)</span><span>R$ " +
+                    (item.price * item.quantity).toFixed(2) +
+                    "</span></div>"
+                  );
+                })
+                .join("") +
+              "</div>" +
+              '<div class="order-total">Total: R$ ' +
+              (order.total || 0).toFixed(2) +
+              "</div>" +
+              '<div style="margin-top:0.5rem;font-size:0.9rem;color:#999;">💳 ' +
+              (order.paymentMethod || "Pix") +
+              "</div>" +
+              (order.status === "pending" || order.status === "confirmed"
+                ? '<div style="margin-top:1rem;text-align:right;"><button onclick="cancelOrder(\'' +
+                  order.id +
+                  '\')" style="background:#c62828;color:white;border:none;padding:0.5rem 1.5rem;border-radius:25px;cursor:pointer;">❌ Cancelar</button></div>'
+                : "") +
+              "</div>"
+            );
           })
           .join("");
       });
 
-      function getStatusName(status) {
-        const names = {
-          pending: "⏳ Pendente",
-          confirmed: "✅ Confirmado",
-          shipped: "🚚 Em Entrega",
-          delivered: "📦 Entregue",
-          cancelled: "❌ Cancelado",
-        };
-        return names[status] || status;
-      }
-
-      function getStatusClass(status) {
-        return "status-" + status;
-      }
-
-      function getPaymentName(method) {
-        const names = {
-          pix: "Pix",
-          credit: "Cartão de Crédito",
-          debit: "Cartão de Débito",
-          boleto: "Boleto",
-        };
-        return names[method] || method;
-      }
-
-      function createProgressBar(status) {
-        const steps = [
-          { id: "pending", icon: "📋", label: "Pedido" },
-          { id: "confirmed", icon: "✅", label: "Confirmado" },
-          { id: "shipped", icon: "🚚", label: "Entrega" },
-          { id: "delivered", icon: "📦", label: "Entregue" },
-        ];
-
-        const statusOrder = ["pending", "confirmed", "shipped", "delivered"];
-        const currentIndex = statusOrder.indexOf(status);
-
-        if (status === "cancelled") {
-          return `
-                    <div class="delivery-progress">
-                        <div class="progress-step">
-                            <div class="step-icon" style="background:#c62828;color:white;">❌</div>
-                            <span class="step-label" style="color:#c62828;">Cancelado</span>
-                        </div>
-                    </div>
-                `;
-        }
-
-        return `
-                <div class="delivery-progress">
-                    ${steps
-                      .map((step, index) => {
-                        const isActive = index <= currentIndex;
-                        return `
-                            <div class="progress-step">
-                                <div class="step-icon ${isActive ? "active" : ""}">${step.icon}</div>
-                                <span class="step-label ${isActive ? "active" : ""}">${step.label}</span>
-                            </div>
-                            ${index < steps.length - 1 ? `<div class="progress-line ${index < currentIndex ? "active" : ""}"></div>` : ""}
-                        `;
-                      })
-                      .join("")}
-                </div>
-            `;
-      }
-      function cancelOrderClient(orderId) {
-        const motivo = prompt(
-          "❌ CANCELAR PEDIDO\n\n" +
-            "Tem certeza que deseja cancelar este pedido?\n\n" +
-            "Digite o motivo do cancelamento:",
-        );
-
-        if (motivo === null) return;
-
-        if (
-          confirm(
-            "Confirma o cancelamento?\n\nMotivo: " +
-              motivo +
-              "\n\nEsta ação não pode ser desfeita.",
-          )
-        ) {
-          const allOrders =
-            JSON.parse(localStorage.getItem("amazoniaOrders")) || [];
-          const order = allOrders.find((o) => o.id === orderId);
-
+      async function cancelOrder(id) {
+        if (confirm("Cancelar este pedido?")) {
+          // Cancelar no Firebase
+          if (typeof db !== "undefined") {
+            try {
+              await db
+                .collection("orders")
+                .doc(id.toString())
+                .update({
+                  status: "cancelled",
+                  cancelledAt: new Date().toISOString(),
+                  cancelledBy: "cliente",
+                });
+            } catch (e) {}
+          }
+          // Cancelar no localStorage
+          var orders = JSON.parse(localStorage.getItem("amazoniaOrders")) || [];
+          var order = orders.find(function (o) {
+            return o.id == id || o.orderNumber == id;
+          });
           if (order) {
             order.status = "cancelled";
-            order.cancelledAt = new Date().toISOString();
-            order.cancelledBy = "cliente";
-            order.cancelledReason = motivo;
-
-            localStorage.setItem("amazoniaOrders", JSON.stringify(allOrders));
-            alert("✅ Pedido cancelado com sucesso!");
-            location.reload();
+            localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
           }
+          alert("✅ Cancelado!");
+          location.reload();
         }
       }
     </script>
+
+    <script src="js/firebase-config.js"></script>
   </body>
 </html>
