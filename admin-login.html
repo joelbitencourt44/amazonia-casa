@@ -113,6 +113,7 @@
     </div>
 
     <script>
+      // Criar admin master no localStorage se não existir (fallback)
       var defaultAdmins = [
         {
           id: "admin-master",
@@ -132,14 +133,46 @@
 
       document
         .getElementById("adminLoginForm")
-        .addEventListener("submit", function (e) {
+        .addEventListener("submit", async function (e) {
           e.preventDefault();
           var email = document.getElementById("adminEmail").value.trim();
           var password = document.getElementById("adminPassword").value;
+
+          // 1. Buscar do Firebase primeiro
+          try {
+            var snap = await db
+              .collection("admins")
+              .where("email", "==", email)
+              .where("password", "==", password)
+              .get();
+
+            if (!snap.empty) {
+              var admin = snap.docs[0].data();
+              var session = {
+                id: admin.id,
+                name: admin.name,
+                email: admin.email,
+                photo: admin.photo || "",
+                role: admin.role,
+                loginAt: new Date().toISOString(),
+              };
+              localStorage.setItem(
+                "amazoniaAdminSession",
+                JSON.stringify(session),
+              );
+              window.location.href = "admin.html";
+              return;
+            }
+          } catch (e) {
+            console.log("Firebase offline, tentando localStorage...");
+          }
+
+          // 2. Fallback: buscar do localStorage
           var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
           var admin = admins.find(function (a) {
             return a.email === email && a.password === password;
           });
+
           if (admin) {
             var session = {
               id: admin.id,

@@ -25,6 +25,17 @@
     </script>
 
     <aside class="admin-sidebar" id="adminSidebar">
+      <!-- Botão de fechar (aparece só no celular) -->
+      <button
+        class="sidebar-close"
+        id="sidebarClose"
+        onclick="
+          document.getElementById('adminSidebar').classList.remove('open')
+        "
+      >
+        &times;
+      </button>
+
       <div class="sidebar-header">
         <span style="font-size: 2rem">🌿</span>
         <h2>Painel de Controle</h2>

@@ -40,7 +40,23 @@ document.addEventListener("DOMContentLoaded", async function () {
   document
     .getElementById("menuToggleAdmin")
     ?.addEventListener("click", function () {
-      document.getElementById("adminSidebar").classList.toggle("open");
+      var sidebar = document.getElementById("adminSidebar");
+      sidebar.classList.toggle("open");
+
+      // Mostrar/Esconder botão X
+      var closeBtn = document.getElementById("sidebarClose");
+      if (closeBtn) {
+        closeBtn.style.display = sidebar.classList.contains("open")
+          ? "block"
+          : "none";
+      }
+    });
+
+  // Botão X para fechar sidebar no mobile
+  document
+    .getElementById("sidebarClose")
+    ?.addEventListener("click", function () {
+      document.getElementById("adminSidebar").classList.remove("open");
     });
 
   document

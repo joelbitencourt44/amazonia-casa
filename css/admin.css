@@ -487,3 +487,23 @@ td {
   text-align: center;
   margin-top: 0.5rem;
 }
+
+/* Botão X para fechar sidebar no mobile */
+.sidebar-close {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+}
+
+@media (max-width: 768px) {
+    .sidebar-close {
+        display: block;
+    }
+}
