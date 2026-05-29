@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minhas Mensagens - Amazônia em Casa</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .messages-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+      }
+      .messages-container h2 {
+        color: #2d5a27;
+        text-align: center;
+      }
+      .ticket-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+      }
+      .ticket-date {
+        color: #999;
+        font-size: 0.85rem;
+      }
+      .ticket-status {
+        padding: 0.2rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+      }
+      .status-pending {
+        background: #fff3e0;
+        color: #e65100;
+      }
+      .status-answered {
+        background: #e8f5e9;
+        color: #2d5a27;
+      }
+      .ticket-question {
+        background: #f5f5f5;
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 0.5rem 0;
+      }
+      .ticket-answer {
+        background: #e8f5e9;
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 0.5rem 0;
+        border-left: 4px solid #2d5a27;
+      }
+      .no-messages {
+        text-align: center;
+        padding: 3rem;
+        color: #999;
+      }
+      .btn-back {
+        display: inline-block;
+        margin-top: 1rem;
+        background: #2d5a27;
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 25px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <nav class="nav-container">
+        <div class="logo">
+          <span style="font-size: 2rem">🌿</span>
+          <h1>Amazônia em Casa</h1>
+        </div>
+        <div class="nav-actions">
+          <a href="index.html" class="btn-login">🏠 Voltar para Loja</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="messages-container">
+      <h2>📬 Minhas Mensagens</h2>
+      <div id="ticketsList"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        var user = JSON.parse(localStorage.getItem("amazoniaLoggedUser"));
+        if (!user) {
+          document.getElementById("ticketsList").innerHTML =
+            '<div class="no-messages"><span>🔒</span><p>Faça login para ver suas mensagens.</p><a href="cadastro.html" class="btn-back">Entrar</a></div>';
+          return;
+        }
+
+        var tickets = [];
+
+        // Buscar do Firebase
+        if (typeof db !== "undefined") {
+          try {
+            var snap = await db
+              .collection("chatbotTickets")
+              .where("email", "==", user.email)
+              .orderBy("date", "desc")
+              .get();
+            snap.forEach(function (doc) {
+              tickets.push({ id: doc.id, ...doc.data() });
+            });
+          } catch (e) {}
+        }
+
+        // Buscar do localStorage também
+        var localTickets =
+          JSON.parse(localStorage.getItem("chatbotTickets")) || [];
+        localTickets.forEach(function (t) {
+          if (
+            t.email === user.email &&
+            !tickets.find(function (x) {
+              return x.id === t.id;
+            })
+          ) {
+            tickets.push(t);
+          }
+        });
+
+        if (tickets.length === 0) {
+          document.getElementById("ticketsList").innerHTML =
+            '<div class="no-messages"><span>💬</span><p>Nenhuma mensagem ainda.</p><p style="color:#999;">Use o chat 💬 no canto da tela para falar conosco!</p></div>';
+          return;
+        }
+
+        document.getElementById("ticketsList").innerHTML = tickets
+          .map(function (t) {
+            return (
+              '<div class="ticket-card">' +
+              '<div class="ticket-header">' +
+              '<span class="ticket-date">' +
+              new Date(t.date).toLocaleString("pt-BR") +
+              "</span>" +
+              '<span class="ticket-status ' +
+              (t.reply ? "status-answered" : "status-pending") +
+              '">' +
+              (t.reply ? "✅ Respondido" : "⏳ Aguardando") +
+              "</span>" +
+              "</div>" +
+              '<div class="ticket-question"><strong>💬 Sua pergunta:</strong><br>' +
+              t.message +
+              "</div>" +
+              (t.reply
+                ? '<div class="ticket-answer"><strong>📩 Resposta' +
+                  (t.repliedBy ? " de " + t.repliedBy : "") +
+                  ":</strong><br>" +
+                  t.reply +
+                  "</div>"
+                : '<p style="color:#999;">Aguardando resposta da equipe...</p>') +
+              "</div>"
+            );
+          })
+          .join("");
+      });
+    </script>
+  </body>
+</html>

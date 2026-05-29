@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (item.dataset.section === "content") loadContentForms();
       if (item.dataset.section === "settings") loadSettingsForm();
       if (item.dataset.section === "messages") loadMessagesTable();
+      if (item.dataset.section === "chatbot") loadChatbotTable();
       if (item.dataset.section === "rewards") loadRewardsTable();
       if (item.dataset.section === "deliveries") loadDeliveriesTable();
       if (item.dataset.section === "admins") loadAdminsTable();
@@ -107,7 +108,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   updateUnreadBadge();
   if (typeof initDeliveries === "function") initDeliveries();
 });
-
 // ============ CARREGAR DADOS DO FIREBASE ============
 async function loadAllData() {
   try {
@@ -1560,6 +1560,7 @@ function checkAdminAccess() {
       window.location.href = "admin-login.html";
     };
 }
+
 function loadAdminsTable() {
   var tbody = document.getElementById("adminsTable");
   if (!tbody) return;
@@ -1572,6 +1573,7 @@ function loadAdminsTable() {
   }
   tbody.innerHTML = admins
     .map(function (a) {
+      var isMe = a.id === session?.id;
       return (
         "<tr><td>" +
         (a.photo
@@ -1592,18 +1594,22 @@ function loadAdminsTable() {
         '">' +
         (a.role === "master" ? "👑 Master" : "👤 Admin") +
         "</span></td><td>" +
-        (a.id !== session?.id
-          ? '<button class="btn-sm btn-edit" onclick="editAdmin(\'' +
-            a.id +
-            '\')">✏️</button><button class="btn-sm btn-delete" onclick="deleteAdmin(\'' +
+        // Botão Editar SEMPRE aparece
+        '<button class="btn-sm btn-edit" onclick="editAdmin(\'' +
+        a.id +
+        "')\">✏️</button>" +
+        // Botão Excluir só aparece para OUTROS admins
+        (!isMe
+          ? '<button class="btn-sm btn-delete" onclick="deleteAdmin(\'' +
             a.id +
             "')\">🗑️</button>"
-          : "Você") +
+          : ' <span style="color:#999;font-size:0.85rem;">Você</span>') +
         "</td></tr>"
       );
     })
     .join("");
 }
+
 function openAdminModal(id) {
   var modal = document.getElementById("adminModal");
   document.getElementById("adminForm").reset();
@@ -1850,4 +1856,214 @@ function cancelOrderAdmin(orderId) {
   loadDashboard();
 
   alert("✅ Pedido cancelado!");
+}
+
+// ============ CHATBOT ============
+var chatbotEmailsVisible = true;
+
+function toggleChatbotEmails() {
+  chatbotEmailsVisible = !chatbotEmailsVisible;
+  document.getElementById("toggleChatbotEmailsBtn").innerHTML =
+    chatbotEmailsVisible ? "👁️ Mostrar E-mails" : "🔒 Esconder E-mails";
+  loadChatbotTable();
+}
+
+function loadChatbotTable() {
+  var tbody = document.getElementById("chatbotTable");
+  if (!tbody) return;
+
+  var tickets = [];
+
+  // Carregar do Firebase
+  if (typeof db !== "undefined") {
+    db.collection("chatbotTickets")
+      .orderBy("date", "desc")
+      .get()
+      .then(function (snap) {
+        tickets = [];
+        snap.forEach(function (doc) {
+          tickets.push({ id: doc.id, ...doc.data() });
+        });
+        renderChatbotTable(tickets);
+      })
+      .catch(function () {
+        // Fallback localStorage
+        tickets = JSON.parse(localStorage.getItem("chatbotTickets")) || [];
+        renderChatbotTable(tickets);
+      });
+  } else {
+    tickets = JSON.parse(localStorage.getItem("chatbotTickets")) || [];
+    renderChatbotTable(tickets);
+  }
+}
+
+function renderChatbotTable(tickets) {
+  var tbody = document.getElementById("chatbotTable");
+  if (!tbody) return;
+
+  if (tickets.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="6" style="text-align:center;color:#999;">Nenhuma pergunta recebida</td></tr>';
+    updateChatbotBadge();
+    return;
+  }
+
+  setupPagination("chatbotTable", tickets, function (pageData) {
+    tbody.innerHTML = pageData
+      .map(function (t) {
+        return (
+          '<tr style="' +
+          (t.status === "pending"
+            ? "background:#f0f7ee;font-weight:bold;"
+            : "") +
+          '">' +
+          "<td>" +
+          new Date(t.date).toLocaleString("pt-BR") +
+          "</td>" +
+          "<td>" +
+          t.name +
+          "</td>" +
+          '<td class="email-column-chatbot">' +
+          (chatbotEmailsVisible ? t.email : "***") +
+          "</td>" +
+          "<td>" +
+          (t.message.length > 50
+            ? t.message.substring(0, 50) + "..."
+            : t.message) +
+          "</td>" +
+          '<td><span class="status-badge ' +
+          (t.status === "pending" ? "inactive" : "active") +
+          '">' +
+          (t.status === "pending" ? "🔵 Pendente" : "✅ Respondido") +
+          "</span></td>" +
+          "<td>" +
+          '<button class="btn-sm btn-edit" onclick="openChatbotReply(\'' +
+          t.id +
+          "')\">✏️ Responder</button> " +
+          '<button class="btn-sm btn-delete" onclick="deleteChatbotTicket(\'' +
+          t.id +
+          "')\">🗑️</button>" +
+          "</td>" +
+          "</tr>"
+        );
+      })
+      .join("");
+  });
+
+  updateChatbotBadge();
+}
+
+function updateChatbotBadge() {
+  var badge = document.getElementById("chatbotBadge");
+  if (!badge) return;
+
+  var tickets = JSON.parse(localStorage.getItem("chatbotTickets")) || [];
+  var count = tickets.filter(function (t) {
+    return t.status === "pending";
+  }).length;
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = "inline-block";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function openChatbotReply(ticketId) {
+  var tickets = JSON.parse(localStorage.getItem("chatbotTickets")) || [];
+  var t = tickets.find(function (t) {
+    return t.id === ticketId;
+  });
+  if (!t) return;
+
+  document.getElementById("chatbotReplyTicketId").value = ticketId;
+  document.getElementById("chatbotReplyContent").innerHTML =
+    '<div class="ticket-question" style="background:#f5f5f5;padding:1rem;border-radius:10px;margin-bottom:1rem;">' +
+    "<strong>👤 " +
+    t.name +
+    "</strong> (" +
+    t.email +
+    ")<br>" +
+    "<strong>📅 " +
+    new Date(t.date).toLocaleString("pt-BR") +
+    "</strong><br><br>" +
+    "<strong>💬 Pergunta:</strong><br>" +
+    t.message +
+    "</div>";
+  document.getElementById("chatbotReplyMessage").value = t.reply || "";
+  document.getElementById("chatbotReplyModal").style.display = "flex";
+}
+
+function closeChatbotReplyModal() {
+  document.getElementById("chatbotReplyModal").style.display = "none";
+}
+
+function sendChatbotReply(e) {
+  e.preventDefault();
+
+  var ticketId = document.getElementById("chatbotReplyTicketId").value;
+  var replyMessage = document.getElementById("chatbotReplyMessage").value;
+  var session = JSON.parse(localStorage.getItem("amazoniaAdminSession"));
+  var repliedBy = session ? session.name : "Admin";
+
+  // Atualizar no localStorage
+  var tickets = JSON.parse(localStorage.getItem("chatbotTickets")) || [];
+  var idx = tickets.findIndex(function (t) {
+    return t.id === ticketId;
+  });
+  if (idx >= 0) {
+    tickets[idx].reply = replyMessage;
+    tickets[idx].repliedBy = repliedBy;
+    tickets[idx].repliedAt = new Date().toISOString();
+    tickets[idx].status = "answered";
+    localStorage.setItem("chatbotTickets", JSON.stringify(tickets));
+  }
+
+  // Atualizar no Firebase
+  if (typeof db !== "undefined") {
+    db.collection("chatbotTickets")
+      .where("id", "==", ticketId)
+      .get()
+      .then(function (snap) {
+        snap.forEach(function (doc) {
+          doc.ref.update({
+            reply: replyMessage,
+            repliedBy: repliedBy,
+            repliedAt: new Date().toISOString(),
+            status: "answered",
+          });
+        });
+      })
+      .catch(function () {});
+  }
+
+  loadChatbotTable();
+  closeChatbotReplyModal();
+  alert("✅ Resposta enviada com sucesso!");
+}
+
+function deleteChatbotTicket(ticketId) {
+  if (confirm("Excluir esta mensagem?")) {
+    var tickets = JSON.parse(localStorage.getItem("chatbotTickets")) || [];
+    tickets = tickets.filter(function (t) {
+      return t.id !== ticketId;
+    });
+    localStorage.setItem("chatbotTickets", JSON.stringify(tickets));
+
+    if (typeof db !== "undefined") {
+      db.collection("chatbotTickets")
+        .where("id", "==", ticketId)
+        .get()
+        .then(function (snap) {
+          snap.forEach(function (doc) {
+            doc.ref.delete();
+          });
+        })
+        .catch(function () {});
+    }
+
+    loadChatbotTable();
+    alert("✅ Excluída!");
+  }
 }

@@ -208,7 +208,12 @@ function checkLoggedUser() {
         user.name +
         '</p><p style="font-size:0.8rem;color:#999;">' +
         user.email +
-        '</p><hr><a href="meu-perfil.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">👤 Meu Perfil</a><a href="meus-pedidos.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">📋 Meus Pedidos</a><a href="minhas-recompensas.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">🏆 Minhas Recompensas</a><hr><button onclick="logout()" style="display:block;width:100%;padding:0.5rem 0;background:none;border:none;color:red;cursor:pointer;text-align:left;font-size:1rem;">🚪 Sair</button>';
+        "</p><hr>" +
+        '<a href="meu-perfil.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">👤 Meu Perfil</a>' +
+        '<a href="meus-pedidos.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">📋 Meus Pedidos</a>' +
+        '<a href="minhas-recompensas.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">🏆 Minhas Recompensas</a>' +
+        '<a href="mensagens-cliente.html" style="display:block;padding:0.5rem 0;color:#2d5a27;text-decoration:none;">📬 Mensagens</a>' +
+        '<hr><button onclick="logout()" style="display:block;width:100%;padding:0.5rem 0;background:none;border:none;color:red;cursor:pointer;text-align:left;font-size:1rem;">🚪 Sair</button>';
       document.body.appendChild(menu);
       setTimeout(function () {
         document.addEventListener("click", function close(e) {
@@ -222,6 +227,7 @@ function checkLoggedUser() {
     showUserCoupons();
   }
 }
+
 function logout() {
   localStorage.removeItem("amazoniaLoggedUser");
   location.reload();

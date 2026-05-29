@@ -54,8 +54,8 @@
         <a href="#rewards" class="nav-item" data-section="rewards"
           ><i class="fas fa-trophy"></i> Recompensas</a
         >
-        <a href="#messages" class="nav-item" data-section="messages"
-          ><i class="fas fa-envelope"></i> Mensagens
+        <a href="#messages" class="nav-item" data-section="messages">
+          <i class="fas fa-envelope"></i> Mensagens
           <span
             id="unreadBadge"
             style="
@@ -68,8 +68,24 @@
               display: none;
             "
             >0</span
-          ></a
-        >
+          >
+        </a>
+        <a href="#chatbot" class="nav-item" data-section="chatbot">
+          <i class="fas fa-robot"></i> Chatbot
+          <span
+            id="chatbotBadge"
+            style="
+              background: #ff6b6b;
+              color: white;
+              padding: 0.1rem 0.5rem;
+              border-radius: 50%;
+              font-size: 0.75rem;
+              font-weight: bold;
+              display: none;
+            "
+            >0</span
+          >
+        </a>
         <a
           href="#admins"
           class="nav-item"
@@ -659,6 +675,76 @@
           </button>
         </form>
       </section>
+      <!-- ==================== CHATBOT ==================== -->
+      <section id="chatbot" class="admin-section">
+        <div class="section-header">
+          <h2>💬 Mensagens do Chatbot</h2>
+          <button
+            class="btn btn-secondary"
+            id="toggleChatbotEmailsBtn"
+            onclick="toggleChatbotEmails()"
+          >
+            👁️ Mostrar E-mails
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th class="email-column-chatbot">E-mail</th>
+                <th>Pergunta</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="chatbotTable">
+              <tr>
+                <td colspan="6" style="text-align: center; color: #999">
+                  Nenhuma pergunta recebida
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Modal de Resposta do Chatbot -->
+      <div id="chatbotReplyModal" class="modal">
+        <div class="modal-content">
+          <span class="close-modal" onclick="closeChatbotReplyModal()"
+            >&times;</span
+          >
+          <h2>📩 Responder Cliente</h2>
+          <div id="chatbotReplyContent" style="margin-bottom: 1rem"></div>
+          <form id="chatbotReplyForm" onsubmit="sendChatbotReply(event)">
+            <input type="hidden" id="chatbotReplyTicketId" />
+            <div class="form-group">
+              <label>Sua Resposta</label>
+              <textarea
+                id="chatbotReplyMessage"
+                class="form-input"
+                rows="4"
+                required
+                placeholder="Digite sua resposta para o cliente..."
+              ></textarea>
+            </div>
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeChatbotReplyModal()"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary">
+                📤 Enviar Resposta
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </main>
 
     <!-- MODAIS -->
