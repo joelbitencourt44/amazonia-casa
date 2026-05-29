@@ -1577,106 +1577,139 @@ function checkAdminAccess() {
     };
 }
 
-function loadAdminsTable() {
+async function deleteAdmin(id) {
+  if (confirm("Excluir este administrador?")) {
+    try {
+      await db.collection("admins").doc(id).delete();
+      console.log("✅ Admin excluído do Firebase");
+    } catch (e) {
+      console.log("Firebase offline, removendo do localStorage");
+      var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
+      admins = admins.filter(function (a) {
+        return a.id !== id;
+      });
+      localStorage.setItem("amazoniaAdmins", JSON.stringify(admins));
+    }
+    loadAdminsTable();
+    alert("✅ Administrador excluído!");
+  }
+}
+
+async function loadAdminsTable() {
   var tbody = document.getElementById("adminsTable");
   if (!tbody) return;
-  var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
-  var session = JSON.parse(localStorage.getItem("amazoniaAdminSession"));
+
+  var admins = [];
+
+  try {
+    var snap = await db.collection("admins").get();
+    snap.forEach(function (doc) {
+      admins.push({ id: doc.id, ...doc.data() });
+    });
+  } catch (e) {
+    console.log("Firebase offline, usando localStorage");
+    admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
+  }
+
   if (!admins.length) {
     tbody.innerHTML =
       '<tr><td colspan="7" style="text-align:center;color:#999;">Nenhum admin</td></tr>';
     return;
   }
+
+  var session = JSON.parse(localStorage.getItem("amazoniaAdminSession"));
+
   tbody.innerHTML = admins
     .map(function (a) {
       var isMe = a.id === session?.id;
       return (
-        "<tr><td>" +
+        "<tr>" +
+        "<td>" +
         (a.photo
           ? '<img src="' +
             a.photo +
             '" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">'
           : "👤") +
-        "</td><td><strong>" +
+        "</td>" +
+        "<td><strong>" +
         a.name +
-        "</strong></td><td>" +
+        "</strong></td>" +
+        "<td>" +
         a.email +
-        "</td><td>" +
+        "</td>" +
+        "<td>" +
         (a.cpf || "-") +
-        "</td><td>" +
+        "</td>" +
+        "<td>" +
         (a.birthDate || "-") +
-        '</td><td><span class="status-badge ' +
+        "</td>" +
+        '<td><span class="status-badge ' +
         (a.role === "master" ? "active" : "inactive") +
         '">' +
         (a.role === "master" ? "👑 Master" : "👤 Admin") +
-        "</span></td><td>" +
-        // Botão Editar SEMPRE aparece
+        "</span></td>" +
+        "<td>" +
         '<button class="btn-sm btn-edit" onclick="editAdmin(\'' +
         a.id +
         "')\">✏️</button>" +
-        // Botão Excluir só aparece para OUTROS admins
         (!isMe
           ? '<button class="btn-sm btn-delete" onclick="deleteAdmin(\'' +
             a.id +
             "')\">🗑️</button>"
           : ' <span style="color:#999;font-size:0.85rem;">Você</span>') +
-        "</td></tr>"
+        "</td>" +
+        "</tr>"
       );
     })
     .join("");
 }
 
-function openAdminModal(id) {
+async function openAdminModal(id) {
   var modal = document.getElementById("adminModal");
   document.getElementById("adminForm").reset();
   document.getElementById("adminId").value = "";
   document.getElementById("adminModalTitle").textContent = "Novo Administrador";
   document.getElementById("adminPhotoPreview").innerHTML =
     '<span style="font-size:3rem;">👤</span>';
+
   if (id) {
-    var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
-    var a = admins.find(function (a) {
-      return a.id === id;
-    });
+    var a = null;
+    try {
+      var doc = await db.collection("admins").doc(id).get();
+      if (doc.exists) {
+        a = { id: doc.id, ...doc.data() };
+      }
+    } catch (e) {
+      var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
+      a = admins.find(function (x) {
+        return x.id === id;
+      });
+    }
+
     if (a) {
       document.getElementById("adminModalTitle").textContent =
         "Editar Administrador";
       document.getElementById("adminId").value = a.id;
-      document.getElementById("adminName").value = a.name;
-      document.getElementById("adminEmail").value = a.email;
+      document.getElementById("adminName").value = a.name || "";
+      document.getElementById("adminEmail").value = a.email || "";
       document.getElementById("adminCpf").value = a.cpf || "";
       document.getElementById("adminBirthDate").value = a.birthDate || "";
-      document.getElementById("adminPassword").value = a.password;
-      document.getElementById("adminRole").value = a.role;
-      if (a.photo)
+      document.getElementById("adminPassword").value = a.password || "";
+      document.getElementById("adminRole").value = a.role || "admin";
+      if (a.photo) {
         document.getElementById("adminPhotoPreview").innerHTML =
           '<img src="' +
           a.photo +
           '" style="width:100%;height:100%;object-fit:cover;">';
+      }
     }
   }
+
   modal.style.display = "flex";
 }
-function closeAdminModal() {
-  document.getElementById("adminModal").style.display = "none";
-}
-function editAdmin(id) {
-  openAdminModal(id);
-}
-function deleteAdmin(id) {
-  if (confirm("Excluir?")) {
-    var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
-    admins = admins.filter(function (a) {
-      return a.id !== id;
-    });
-    localStorage.setItem("amazoniaAdmins", JSON.stringify(admins));
-    loadAdminsTable();
-    alert("✅ Excluído!");
-  }
-}
-function saveAdminData(id, photoData) {
-  var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
-  var data = {
+
+async function saveAdminData(id, photoData) {
+  var adminData = {
     id: id,
     name: document.getElementById("adminName").value,
     email: document.getElementById("adminEmail").value.trim(),
@@ -1685,16 +1718,35 @@ function saveAdminData(id, photoData) {
     password: document.getElementById("adminPassword").value,
     photo: photoData,
     role: document.getElementById("adminRole").value,
+    updatedAt: new Date().toISOString(),
   };
-  var idx = admins.findIndex(function (a) {
-    return a.id === id;
-  });
-  if (idx >= 0) admins[idx] = data;
-  else admins.push({ ...data, createdAt: new Date().toISOString() });
-  localStorage.setItem("amazoniaAdmins", JSON.stringify(admins));
+
+  try {
+    var doc = await db.collection("admins").doc(id).get();
+    if (doc.exists) {
+      await db.collection("admins").doc(id).update(adminData);
+    } else {
+      adminData.createdAt = new Date().toISOString();
+      await db.collection("admins").doc(id).set(adminData);
+    }
+    console.log("✅ Admin salvo no Firebase:", adminData.email);
+  } catch (e) {
+    console.log("Firebase offline, salvando no localStorage");
+    var admins = JSON.parse(localStorage.getItem("amazoniaAdmins")) || [];
+    var idx = admins.findIndex(function (a) {
+      return a.id === id;
+    });
+    if (idx >= 0) {
+      admins[idx] = adminData;
+    } else {
+      admins.push(adminData);
+    }
+    localStorage.setItem("amazoniaAdmins", JSON.stringify(admins));
+  }
+
   loadAdminsTable();
   closeAdminModal();
-  alert("✅ Salvo!");
+  alert("✅ Administrador salvo!");
 }
 
 // ============ PAGINAÇÃO ============
