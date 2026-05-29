@@ -225,12 +225,36 @@
             .classList.add("active");
         });
       });
+
+      // LOGIN - busca Firebase primeiro
       document
         .getElementById("loginForm")
-        .addEventListener("submit", function (e) {
+        .addEventListener("submit", async function (e) {
           e.preventDefault();
           var email = document.getElementById("loginEmail").value;
           var password = document.getElementById("loginPassword").value;
+
+          try {
+            var snap = await db
+              .collection("customers")
+              .where("email", "==", email)
+              .where("password", "==", password)
+              .get();
+            if (!snap.empty) {
+              var user = snap.docs[0].data();
+              localStorage.setItem("amazoniaLoggedUser", JSON.stringify(user));
+              document.getElementById("successMessage").textContent =
+                "✅ Login OK! Redirecionando...";
+              document.getElementById("successMessage").style.display = "block";
+              setTimeout(function () {
+                window.location.href = "index.html";
+              }, 1500);
+              return;
+            }
+          } catch (e) {
+            console.log("Firebase offline, tentando localStorage...");
+          }
+
           var users =
             JSON.parse(localStorage.getItem("amazoniaCustomers")) || [];
           var user = users.find(function (u) {
@@ -250,9 +274,11 @@
             document.getElementById("errorMessage").style.display = "block";
           }
         });
+
+      // CADASTRO - salva no Firebase
       document
         .getElementById("registerForm")
-        .addEventListener("submit", function (e) {
+        .addEventListener("submit", async function (e) {
           e.preventDefault();
           var p1 = document.getElementById("regPassword").value;
           var p2 = document.getElementById("regConfirmPassword").value;
@@ -262,22 +288,39 @@
             document.getElementById("errorMessage").style.display = "block";
             return;
           }
-          var users =
-            JSON.parse(localStorage.getItem("amazoniaCustomers")) || [];
-          if (
-            users.find(function (u) {
-              return u.email === document.getElementById("regEmail").value;
-            })
-          ) {
-            document.getElementById("errorMessage").textContent =
-              "❌ E-mail já cadastrado.";
-            document.getElementById("errorMessage").style.display = "block";
-            return;
+          var email = document.getElementById("regEmail").value;
+
+          try {
+            var snap = await db
+              .collection("customers")
+              .where("email", "==", email)
+              .get();
+            if (!snap.empty) {
+              document.getElementById("errorMessage").textContent =
+                "❌ E-mail já cadastrado.";
+              document.getElementById("errorMessage").style.display = "block";
+              return;
+            }
+          } catch (e) {
+            console.log("Firebase offline, verificando localStorage...");
+            var users =
+              JSON.parse(localStorage.getItem("amazoniaCustomers")) || [];
+            if (
+              users.find(function (u) {
+                return u.email === email;
+              })
+            ) {
+              document.getElementById("errorMessage").textContent =
+                "❌ E-mail já cadastrado.";
+              document.getElementById("errorMessage").style.display = "block";
+              return;
+            }
           }
+
           var newUser = {
-            id: Date.now(),
+            id: Date.now().toString(),
             name: document.getElementById("regName").value,
-            email: document.getElementById("regEmail").value,
+            email: email,
             phone: document.getElementById("regPhone").value,
             cpf: document.getElementById("regCpf").value,
             cep: document.getElementById("regCep").value,
@@ -287,9 +330,19 @@
             password: p1,
             createdAt: new Date().toISOString(),
           };
+
+          try {
+            await db.collection("customers").doc(newUser.id).set(newUser);
+          } catch (e) {
+            console.log("Firebase offline, salvando localmente");
+          }
+
+          var users =
+            JSON.parse(localStorage.getItem("amazoniaCustomers")) || [];
           users.push(newUser);
           localStorage.setItem("amazoniaCustomers", JSON.stringify(users));
           localStorage.setItem("amazoniaLoggedUser", JSON.stringify(newUser));
+
           document.getElementById("successMessage").textContent =
             "✅ Conta criada! Redirecionando...";
           document.getElementById("successMessage").style.display = "block";
