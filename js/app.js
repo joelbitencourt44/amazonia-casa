@@ -1015,3 +1015,261 @@ window.loadAllProducts = loadAllProducts;
 window.renderCart = renderCart;
 window.updateCartCount = updateCartCount;
 window.saveCart = saveCart;
+
+// ============ GALERIA - 5 FOTOS POR VEZ ============
+var galleryImages = [];
+var currentSlide = 0;
+var itemsVisible = 5;
+var galleryInterval = null;
+
+async function loadGalleryFromFirebase() {
+    try {
+        var doc = await db.collection("siteConfig").doc("gallery").get();
+        if (doc.exists && doc.data().images) {
+            galleryImages = doc.data().images;
+        } else {
+            galleryImages = [];
+        }
+    } catch(e) {
+        galleryImages = JSON.parse(localStorage.getItem("galleryImages")) || [];
+    }
+    loadPhotoGallery();
+}
+
+function loadPhotoGallery() {
+    if (galleryImages.length === 0) {
+        document.getElementById("photoGallery").style.display = "none";
+        return;
+    }
+
+    document.getElementById("photoGallery").style.display = "block";
+    
+    // Se tiver menos de 5, mostrar quantas tiver
+    if (galleryImages.length < itemsVisible) {
+        itemsVisible = galleryImages.length;
+    } else {
+        itemsVisible = 5;
+    }
+    
+    // Criar array duplicado para loop infinito
+    var loopImages = galleryImages.concat(galleryImages).concat(galleryImages);
+    
+    var track = document.getElementById("galleryTrack");
+    if (!track) return;
+    
+    var imgWidth = (100 / itemsVisible);
+    
+    track.innerHTML = loopImages.map(function(img) {
+        return '<div style="min-width:' + imgWidth + '%;flex-shrink:0;cursor:pointer;" onclick="openImageModal(\'' + img + '\')">' +
+            '<img src="' + img + '" style="width:100%;height:220px;object-fit:cover;border-radius:10px;">' +
+            '</div>';
+    }).join("");
+    
+    // Começar do meio
+    currentSlide = galleryImages.length;
+    updateGalleryPosition(false);
+    
+    // Criar bolinhas
+    var dotsContainer = document.getElementById("galleryDots");
+    if (dotsContainer) {
+        var totalPages = Math.ceil(galleryImages.length / 1); // 1 por clique
+        dotsContainer.innerHTML = "";
+        for (var i = 0; i < galleryImages.length; i++) {
+            var dot = document.createElement("span");
+            dot.style.cssText = "display:inline-block;width:8px;height:8px;border-radius:50%;background:#ccc;margin:0 3px;transition:all 0.3s;cursor:pointer;";
+            dot.onclick = (function(index) {
+                return function() {
+                    currentSlide = index + galleryImages.length;
+                    updateGalleryPosition(true);
+                    startGalleryAutoPlay();
+                };
+            })(i);
+            dotsContainer.appendChild(dot);
+        }
+    }
+    
+    updateGalleryCounter();
+    startGalleryAutoPlay();
+}
+
+function updateGalleryPosition(animate) {
+    var track = document.getElementById("galleryTrack");
+    if (!track) return;
+    
+    var imgWidth = (100 / itemsVisible);
+    
+    if (!animate) {
+        track.style.transition = "none";
+    } else {
+        track.style.transition = "transform 0.6s ease-in-out";
+    }
+    
+    track.style.transform = "translateX(-" + (currentSlide * imgWidth) + "%)";
+    
+    // Atualizar bolinhas
+    var dots = document.querySelectorAll("#galleryDots span");
+    var realIndex = currentSlide % galleryImages.length;
+    dots.forEach(function(dot, i) {
+        dot.style.background = (i === realIndex) ? "#2d5a27" : "#ccc";
+        dot.style.transform = (i === realIndex) ? "scale(1.3)" : "scale(1)";
+    });
+    
+    updateGalleryCounter();
+    
+    // Loop infinito: resetar posição sem animação
+    if (currentSlide >= galleryImages.length * 2) {
+        setTimeout(function() {
+            currentSlide = galleryImages.length;
+            track.style.transition = "none";
+            track.style.transform = "translateX(-" + (currentSlide * imgWidth) + "%)";
+        }, 600);
+    }
+    if (currentSlide < 0) {
+        setTimeout(function() {
+            currentSlide = galleryImages.length * 2 - 1;
+            track.style.transition = "none";
+            track.style.transform = "translateX(-" + (currentSlide * imgWidth) + "%)";
+        }, 600);
+    }
+}
+
+function nextGallerySlide() {
+    currentSlide++;
+    updateGalleryPosition(true);
+    startGalleryAutoPlay();
+}
+
+function prevGallerySlide() {
+    currentSlide--;
+    updateGalleryPosition(true);
+    startGalleryAutoPlay();
+}
+
+function startGalleryAutoPlay() {
+    if (galleryInterval) clearInterval(galleryInterval);
+    if (galleryImages.length > 1) {
+        galleryInterval = setInterval(function() {
+            nextGallerySlide();
+        }, 3500);
+    }
+}
+
+function updateGalleryCounter() {
+    var realIndex = (currentSlide % galleryImages.length) + 1;
+    var counter = document.getElementById("galleryCounter");
+    if (counter) counter.textContent = realIndex + " / " + galleryImages.length;
+}
+
+function openImageModal(img) {
+    var modal = document.createElement("div");
+    modal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;";
+    modal.innerHTML = '<img src="' + img + '" style="max-width:95%;max-height:95%;border-radius:10px;">' +
+        '<button onclick="this.parentElement.remove()" style="position:absolute;top:20px;right:20px;background:white;border:none;width:40px;height:40px;border-radius:50%;font-size:1.5rem;cursor:pointer;">&times;</button>';
+    modal.addEventListener("click", function(e) { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
+}
+
+document.addEventListener("DOMContentLoaded", async function () {
+    await loadGalleryFromFirebase();
+    await loadFeaturedFeedbacks();
+});
+
+// ============ FEEDBACKS DESTACADOS ============
+var currentFeedbackIndex = 0;
+var feedbackInterval = null;
+
+async function loadFeaturedFeedbacks() {
+  var feedbacks = [];
+
+  try {
+    var snap = await db
+      .collection("feedbacks")
+      .where("featured", "==", true)
+      .get();
+    snap.forEach(function (doc) {
+      feedbacks.push({ id: doc.id, ...doc.data() });
+    });
+  } catch (e) {
+    var localFeedbacks =
+      JSON.parse(localStorage.getItem("amazoniaFeedbacks")) || [];
+    feedbacks = localFeedbacks.filter(function (f) {
+      return f.featured === true;
+    });
+  }
+
+  if (feedbacks.length === 0) {
+    var container = document.getElementById("featuredFeedbacks");
+    if (container) container.style.display = "none";
+    return;
+  }
+
+  var container = document.getElementById("featuredFeedbacks");
+  if (container) container.style.display = "block";
+
+  var slides = document.getElementById("feedbackSlides");
+  if (!slides) return;
+
+  slides.innerHTML = feedbacks
+    .map(function (f) {
+      return (
+        '<div style="min-width:100%;text-align:center;padding:1.5rem;">' +
+        '<p style="font-style:italic;color:#555;font-size:1.1rem;">"' +
+        f.message +
+        '"</p>' +
+        '<p style="color:#2d5a27;font-weight:bold;margin-top:0.5rem;">— ' +
+        f.name +
+        "</p></div>"
+      );
+    })
+    .join("");
+
+  currentFeedbackIndex = 0;
+  updateFeedbackCarousel();
+
+  // Iniciar auto-passagem
+  startFeedbackAutoPlay();
+}
+
+function startFeedbackAutoPlay() {
+  if (feedbackInterval) clearInterval(feedbackInterval);
+  var slides = document.getElementById("feedbackSlides");
+  if (slides && slides.children.length > 1) {
+    feedbackInterval = setInterval(function () {
+      nextFeedback();
+    }, 5000);
+  }
+}
+
+function prevFeedback() {
+  var slides = document.getElementById("feedbackSlides");
+  if (!slides || slides.children.length === 0) return;
+  currentFeedbackIndex =
+    (currentFeedbackIndex - 1 + slides.children.length) %
+    slides.children.length;
+  updateFeedbackCarousel();
+  startFeedbackAutoPlay();
+}
+
+function nextFeedback() {
+  var slides = document.getElementById("feedbackSlides");
+  if (!slides || slides.children.length === 0) return;
+  currentFeedbackIndex = (currentFeedbackIndex + 1) % slides.children.length;
+  updateFeedbackCarousel();
+  startFeedbackAutoPlay();
+}
+
+function updateFeedbackCarousel() {
+  var slides = document.getElementById("feedbackSlides");
+  if (!slides || slides.children.length === 0) return;
+  slides.style.transform = "translateX(-" + currentFeedbackIndex * 100 + "%)";
+  var counter = document.getElementById("feedbackCounter");
+  if (counter)
+    counter.textContent =
+      currentFeedbackIndex + 1 + " / " + slides.children.length;
+}
+
+// ============ INICIAR TUDO ============
+document.addEventListener("DOMContentLoaded", async function () {
+  await loadGalleryFromFirebase();
+  await loadFeaturedFeedbacks();
+});

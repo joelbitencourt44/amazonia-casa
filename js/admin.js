@@ -1450,13 +1450,14 @@ async function loadMessagesTable() {
   }
   if (!feedbacks.length) {
     tbody.innerHTML =
-      '<tr><td colspan="6" style="text-align:center;color:#999;">Nenhuma mensagem</td></tr>';
+      '<tr><td colspan="7" style="text-align:center;color:#999;">Nenhuma mensagem</td></tr>';
     updateUnreadBadge();
     return;
   }
   setupPagination("messagesTable", feedbacks, function (pageData) {
     tbody.innerHTML = pageData
       .map(function (f) {
+        var isFeatured = f.featured === true;
         return (
           '<tr style="' +
           (f.read ? "" : "background:#f0f7ee;font-weight:bold;") +
@@ -1474,40 +1475,26 @@ async function loadMessagesTable() {
           (f.read ? "active" : "inactive") +
           '">' +
           (f.read ? "✅ Lida" : "🔵 Nova") +
-          '</span></td><td><button class="btn-sm btn-edit" onclick="viewMessage(\'' +
+          "</span></td><td>" +
+          '<button class="btn-sm btn-edit" onclick="viewMessage(\'' +
           f.id +
-          '\')">👁️</button><button class="btn-sm btn-delete" onclick="deleteMessage(\'' +
+          "')\">👁️</button> " +
+          '<button class="btn-sm" style="background:' +
+          (isFeatured ? "#DAA520" : "#ccc") +
+          ';color:white;border:none;" onclick="toggleFeatured(\'' +
           f.id +
-          "')\">🗑️</button></td></tr>"
+          '\')" title="Destacar na home">⭐</button> ' +
+          '<button class="btn-sm btn-delete" onclick="deleteMessage(\'' +
+          f.id +
+          "')\">🗑️</button>" +
+          "</td></tr>"
         );
       })
       .join("");
   });
   updateUnreadBadge();
 }
-async function updateUnreadBadge() {
-  var badge = document.getElementById("unreadBadge");
-  if (!badge) return;
-  var count = 0;
-  try {
-    var snap = await db
-      .collection("feedbacks")
-      .where("read", "==", false)
-      .get();
-    count = snap.size;
-  } catch (e) {
-    var fb = JSON.parse(localStorage.getItem("amazoniaFeedbacks")) || [];
-    count = fb.filter(function (f) {
-      return !f.read;
-    }).length;
-  }
-  if (count > 0) {
-    badge.textContent = count;
-    badge.style.display = "inline-block";
-  } else {
-    badge.style.display = "none";
-  }
-}
+
 async function viewMessage(id) {
   try {
     var d = await db.collection("feedbacks").doc(id.toString()).get();
@@ -2135,3 +2122,162 @@ function deleteChatbotTicket(ticketId) {
     alert("✅ Excluída!");
   }
 }
+
+// ============ DESTACAR FEEDBACK NA HOME ============
+async function toggleFeatured(id) {
+  var feedbacks = [];
+
+  // Buscar do Firebase
+  try {
+    var snap = await db.collection("feedbacks").get();
+    snap.forEach(function (d) {
+      feedbacks.push({ id: d.id, ...d.data() });
+    });
+  } catch (e) {
+    feedbacks = JSON.parse(localStorage.getItem("amazoniaFeedbacks")) || [];
+  }
+
+  var f = feedbacks.find(function (fb) {
+    return fb.id === id || String(fb.id) === String(id);
+  });
+  if (!f) return;
+
+  f.featured = !f.featured;
+
+  // Salvar no localStorage
+  localStorage.setItem("amazoniaFeedbacks", JSON.stringify(feedbacks));
+
+  // Atualizar no Firebase
+  try {
+    await db
+      .collection("feedbacks")
+      .doc(String(id))
+      .update({ featured: f.featured });
+  } catch (e) {
+    console.log("Firebase offline");
+  }
+
+  loadMessagesTable();
+  alert(
+    f.featured
+      ? "⭐ Feedback destacado na página inicial!"
+      : "⭐ Feedback removido dos destaques!",
+  );
+}
+
+// ============ GALERIA DE IMAGENS ============
+var galleryImages = [];
+
+// Carregar imagens da galeria
+async function loadGallery() {
+    try {
+        var doc = await db.collection("siteConfig").doc("gallery").get();
+        if (doc.exists && doc.data().images) {
+            galleryImages = doc.data().images;
+        } else {
+            galleryImages = [];
+        }
+    } catch(e) {
+        galleryImages = JSON.parse(localStorage.getItem("galleryImages")) || [];
+    }
+    renderGalleryPreview();
+}
+
+// Mostrar preview das imagens
+function renderGalleryPreview() {
+    var container = document.getElementById("galleryPreview");
+    if (!container) return;
+    
+    if (galleryImages.length === 0) {
+        container.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;">Nenhuma imagem na galeria</p>';
+        return;
+    }
+    
+    container.innerHTML = galleryImages.map(function(img, index) {
+        return '<div style="position:relative;border:2px solid #ddd;border-radius:10px;overflow:hidden;">' +
+            '<img src="' + img + '" style="width:100%;height:150px;object-fit:cover;">' +
+            '<button onclick="removeGalleryImage(' + index + ')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;width:25px;height:25px;border-radius:50%;cursor:pointer;font-size:0.8rem;">✕</button>' +
+            '</div>';
+    }).join("");
+}
+
+// Fazer upload de imagens
+async function uploadGalleryImages() {
+    var input = document.getElementById("galleryImageInput");
+    var files = input.files;
+    
+    if (!files || files.length === 0) {
+        alert("Selecione pelo menos uma imagem!");
+        return;
+    }
+    
+    document.getElementById("uploadStatus").textContent = "⏳ Enviando " + files.length + " imagem(ns)...";
+    
+    for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        
+        // Converter para base64 (máximo 500KB para não estourar)
+        var reader = new FileReader();
+        
+        await new Promise(function(resolve) {
+            reader.onload = function(e) {
+                // Redimensionar imagem para no máximo 800px de largura
+                var img = new Image();
+                img.onload = function() {
+                    var canvas = document.createElement("canvas");
+                    var maxWidth = 800;
+                    var scale = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Comprimir para JPEG com qualidade 0.7
+                    var compressed = canvas.toDataURL("image/jpeg", 0.7);
+                    galleryImages.push(compressed);
+                    resolve();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // Salvar no Firebase
+    await saveGalleryToFirebase();
+    
+    document.getElementById("uploadStatus").textContent = "✅ " + files.length + " imagem(ns) adicionada(s)!";
+    input.value = "";
+    renderGalleryPreview();
+}
+
+// Remover imagem da galeria
+function removeGalleryImage(index) {
+    if (confirm("Remover esta imagem da galeria?")) {
+        galleryImages.splice(index, 1);
+        saveGalleryToFirebase();
+        renderGalleryPreview();
+    }
+}
+
+// Salvar no Firebase
+async function saveGalleryToFirebase() {
+    try {
+        await db.collection("siteConfig").doc("gallery").set({
+            images: galleryImages,
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+    } catch(e) {
+        console.log("Firebase offline, salvando localmente");
+    }
+    localStorage.setItem("galleryImages", JSON.stringify(galleryImages));
+}
+
+// Salvar ordem (placeholder - a ordem já é mantida pelo array)
+function saveGalleryOrder() {
+    saveGalleryToFirebase();
+    alert("✅ Ordem salva!");
+}
+
+// Carregar galeria ao abrir a aba
+document.querySelector('a[data-section="gallery"]')?.addEventListener("click", loadGallery);

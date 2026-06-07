@@ -62,6 +62,9 @@
         <a href="#content" class="nav-item" data-section="content"
           ><i class="fas fa-edit"></i> Conteúdo</a
         >
+        <a href="#gallery" class="nav-item" data-section="gallery">
+          <i class="fas fa-images"></i> Galeria
+        </a>
         <a href="#rewards" class="nav-item" data-section="rewards"
           ><i class="fas fa-trophy"></i> Recompensas</a
         >
@@ -756,6 +759,25 @@
           </form>
         </div>
       </div>
+
+      <section id="gallery" class="admin-section">
+    <h2>📷 Gerenciar Galeria</h2>
+    <p style="color:#666;">Faça upload das imagens que aparecerão na galeria da página inicial</p>
+    
+    <!-- Upload de nova imagem -->
+    <div style="background:#f9f9f9;padding:1.5rem;border-radius:10px;margin-bottom:1.5rem;">
+        <h4>➕ Adicionar Nova Imagem</h4>
+        <input type="file" id="galleryImageInput" class="form-input" accept="image/*" multiple style="margin-bottom:1rem;">
+        <button class="btn btn-primary" onclick="uploadGalleryImages()">📤 Fazer Upload</button>
+        <p id="uploadStatus" style="margin-top:0.5rem;color:#666;"></p>
+    </div>
+    
+    <!-- Imagens atuais -->
+    <h4>📸 Imagens da Galeria (arraste para reordenar)</h4>
+    <div id="galleryPreview" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:1rem;"></div>
+    
+    <button class="btn btn-primary" onclick="saveGalleryOrder()" style="margin-top:1rem;">💾 Salvar Ordem</button>
+</section>
     </main>
 
     <!-- MODAIS -->

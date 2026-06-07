@@ -83,7 +83,7 @@
             <div class="hero-content" style="text-align: left">
               <h2>Direto da Floresta para Sua Casa</h2>
               <p>Produtos naturais da Amazônia com rastreabilidade completa.</p>
-              <div class="hero-cta">
+              <div class="hero-cta" style="margin-bottom: 0">
                 <a href="#products" class="btn btn-primary">Ver Produtos</a>
                 <a href="#impact" class="btn btn-secondary">Nosso Impacto</a>
               </div>
@@ -109,6 +109,205 @@
           class="coupon-banner"
           style="display: none"
         ></div>
+
+        <!-- Feedbacks Destacados -->
+        <div id="featuredFeedbacks" style="margin: 0 0 2rem; display: none">
+          <h3 style="text-align: center; color: #2d5a27; margin-bottom: 1rem">
+            ⭐ O que nossos clientes dizem
+          </h3>
+          <div
+            id="feedbackCarousel"
+            style="
+              max-width: 800px;
+              margin: 0 auto;
+              overflow: hidden;
+              position: relative;
+            "
+          >
+            <div
+              id="feedbackSlides"
+              style="display: flex; transition: transform 0.5s ease"
+            ></div>
+            <div
+              style="
+                text-align: center;
+                margin-top: 0.5rem;
+                padding-bottom: 0;
+                display: none;
+              "
+            >
+              <button
+                onclick="prevFeedback()"
+                style="
+                  background: #2d5a27;
+                  color: white;
+                  border: none;
+                  padding: 0.3rem 1rem;
+                  border-radius: 20px;
+                  cursor: pointer;
+                "
+              >
+                ←
+              </button>
+              <span
+                id="feedbackCounter"
+                style="margin: 0 1rem; color: #666"
+              ></span>
+              <button
+                onclick="nextFeedback()"
+                style="
+                  background: #2d5a27;
+                  color: white;
+                  border: none;
+                  padding: 0.3rem 1rem;
+                  border-radius: 20px;
+                  cursor: pointer;
+                "
+              >
+                →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedbacks Destacados -->
+        <div id="featuredFeedbacks" style="margin: 2rem 0; display: none">
+          <h3 style="text-align: center; color: #2d5a27; margin-bottom: 1rem">
+            ⭐ O que nossos clientes dizem
+          </h3>
+          <div
+            id="feedbackCarousel"
+            style="
+              max-width: 800px;
+              margin: 0 auto;
+              overflow: hidden;
+              position: relative;
+            "
+          >
+            <div
+              id="feedbackSlides"
+              style="display: flex; transition: transform 0.5s ease"
+            ></div>
+          </div>
+          <div style="text-align: center; margin-top: 0.5rem">
+            <button
+              onclick="prevFeedback()"
+              style="
+                background: #2d5a27;
+                color: white;
+                border: none;
+                padding: 0.3rem 1rem;
+                border-radius: 20px;
+                cursor: pointer;
+              "
+            >
+              ←
+            </button>
+            <span
+              id="feedbackCounter"
+              style="margin: 0 1rem; color: #666"
+            ></span>
+            <button
+              onclick="nextFeedback()"
+              style="
+                background: #2d5a27;
+                color: white;
+                border: none;
+                padding: 0.3rem 1rem;
+                border-radius: 20px;
+                cursor: pointer;
+              "
+            >
+              →
+            </button>
+          </div>
+        </div>
+
+        <!-- Galeria de Imagens - 5 Fotos por Vez -->
+        <div id="photoGallery" style="margin: 1rem 0; display: none">
+          <h3 style="text-align: center; color: #2d5a27; margin-bottom: 1rem">
+            📷 Galeria
+          </h3>
+
+          <div
+            style="
+              max-width: 1000px;
+              margin: 0 auto;
+              overflow: hidden;
+              position: relative;
+              border-radius: 15px;
+            "
+          >
+            <!-- Faixa de imagens que desliza -->
+            <div
+              id="galleryTrack"
+              style="
+                display: flex;
+                transition: transform 0.6s ease-in-out;
+                gap: 8px;
+              "
+            ></div>
+
+            <!-- Setas -->
+            <button
+              onclick="prevGallerySlide()"
+              style="
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.5);
+                color: white;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 1.2rem;
+                z-index: 10;
+              "
+            >
+              ←
+            </button>
+            <button
+              onclick="nextGallerySlide()"
+              style="
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.5);
+                color: white;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 1.2rem;
+                z-index: 10;
+              "
+            >
+              →
+            </button>
+          </div>
+
+          <!-- Indicadores -->
+          <div
+            id="galleryDots"
+            style="text-align: center; margin-top: 10px"
+          ></div>
+          <div
+            style="
+              text-align: center;
+              color: #666;
+              font-size: 0.9rem;
+              margin-top: 5px;
+            "
+          >
+            <span id="galleryCounter"></span>
+          </div>
+        </div>
+
         <div class="featured-section">
           <h3>Produtos em Destaque</h3>
           <div class="products-grid" id="featuredProducts"></div>
@@ -156,7 +355,7 @@
         class="section tracking-section"
         style="display: none"
       >
-        <h2>🌿 Rastreabilidade dos Produtos</h2>
+        <h2>Rastreabilidade dos Produtos</h2>
         <p
           style="
             text-align: center;
@@ -216,7 +415,7 @@
       </section>
 
       <section id="impact" class="section impact-section" style="display: none">
-        <h2>🌳 O Impacto da Sua Compra</h2>
+        <h2>O Impacto da Sua Compra</h2>
         <p
           style="
             text-align: center;
@@ -230,7 +429,7 @@
         </p>
         <div class="impact-calculator">
           <h3 style="text-align: center; color: #2d5a27">
-            💰 Simule o valor da sua compra:
+            Simule o valor da sua compra:
           </h3>
           <div class="calculator-input">
             <input
@@ -245,21 +444,33 @@
           </div>
           <div class="impact-results">
             <div class="impact-card">
-              <span style="font-size: 3rem">🌳</span>
+              <img
+                src="https://agenciapara.com.br/midias/2024/grandes/up_ag_60131_d05cf2dd-95fe-e2fa-3fab-b073737e20b4.jpg"
+                alt="Floresta"
+                style="width: 100%; height: auto; border-radius: 10px"
+              />
               <h4>Floresta Protegida</h4>
               <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
                 <span id="treesPreserved">1.50</span> ha
               </p>
             </div>
             <div class="impact-card">
-              <span style="font-size: 3rem">👨‍🌾</span>
+              <img
+                src="https://museudasculturasindigenas.org.br/wp-content/uploads/2024/05/image.png"
+                alt="Floresta"
+                style="width: 100%; height: auto; border-radius: 10px"
+              />
               <h4>Famílias Apoiadas</h4>
               <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
                 <span id="familiesHelped">1</span>
               </p>
             </div>
             <div class="impact-card">
-              <span style="font-size: 3rem">🐝</span>
+              <img
+                src="https://imagens-cdn.canalrural.com.br/2024/02/Produtores-do-Litoral-formam-associacao-para-incentivar-criacao-de-abelhas-sem-ferrao-1024x682.jpg"
+                alt="Floresta"
+                style="width: 100%; height: auto; border-radius: 10px"
+              />
               <h4>Abelhas Protegidas</h4>
               <p style="font-size: 2rem; font-weight: bold; color: #2d5a27">
                 <span id="beesSaved">3.000</span>
@@ -650,92 +861,353 @@
             ></label
           >
         </div>
-        <h4 style="margin-top:1.5rem;">💳 Forma de Pagamento</h4>
+        <h4 style="margin-top: 1.5rem">💳 Forma de Pagamento</h4>
 
-<div class="payment-tabs">
-    <button class="payment-tab active" onclick="showPaymentTab('pix')">📱 Pix</button>
-    <button class="payment-tab" onclick="showPaymentTab('credit')">💳 Crédito</button>
-    <button class="payment-tab" onclick="showPaymentTab('debit')">🏦 Débito</button>
-    <button class="payment-tab" onclick="showPaymentTab('boleto')">🔗 Boleto</button>
-    <button class="payment-tab" onclick="showPaymentTab('combined')">🔄 Combinar</button>
-    <button class="payment-tab" onclick="showPaymentTab('twocards')">💳💳 2 Cartões</button>
-</div>
+        <div class="payment-tabs">
+          <button class="payment-tab active" onclick="showPaymentTab('pix')">
+            📱 Pix
+          </button>
+          <button class="payment-tab" onclick="showPaymentTab('credit')">
+            💳 Crédito
+          </button>
+          <button class="payment-tab" onclick="showPaymentTab('debit')">
+            🏦 Débito
+          </button>
+          <button class="payment-tab" onclick="showPaymentTab('boleto')">
+            🔗 Boleto
+          </button>
+          <button class="payment-tab" onclick="showPaymentTab('combined')">
+            🔄 Combinar
+          </button>
+          <button class="payment-tab" onclick="showPaymentTab('twocards')">
+            💳💳 2 Cartões
+          </button>
+        </div>
 
-<!-- Painel Pix -->
-<div id="paymentPanel_pix" class="payment-panel active">
-    <div class="payment-info-box">
-        <p><strong>📱 Pagamento via Pix</strong></p>
-        <p style="color:#2d5a27;">✅ <strong>5% de desconto</strong> no Pix</p>
-        <p style="color:#999;font-size:0.85rem;">Pagamento instantâneo, aprovado na hora.</p>
-    </div>
-</div>
+        <!-- Painel Pix -->
+        <div id="paymentPanel_pix" class="payment-panel active">
+          <div class="payment-info-box">
+            <p><strong>📱 Pagamento via Pix</strong></p>
+            <p style="color: #2d5a27">
+              ✅ <strong>5% de desconto</strong> no Pix
+            </p>
+            <p style="color: #999; font-size: 0.85rem">
+              Pagamento instantâneo, aprovado na hora.
+            </p>
+          </div>
+        </div>
 
-<!-- Painel Crédito -->
-<div id="paymentPanel_credit" class="payment-panel" style="display:none;">
-    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
-        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
-        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
-        <div class="form-group"><label>Parcelas</label><select class="form-input" id="creditInstallments"><option value="1">1x sem juros</option><option value="2">2x sem juros</option><option value="3">3x sem juros</option></select></div>
-    </div>
-    <div class="form-group"><label>Nome no Cartão</label><input type="text" class="form-input" placeholder="Como está no cartão"></div>
-    <div class="form-group"><label>CPF do Titular</label><input type="text" class="form-input" placeholder="000.000.000-00"></div>
-</div>
+        <!-- Painel Crédito -->
+        <div
+          id="paymentPanel_credit"
+          class="payment-panel"
+          style="display: none"
+        >
+          <div class="form-group">
+            <label>Número do Cartão</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="0000 0000 0000 0000"
+              maxlength="19"
+            />
+          </div>
+          <div
+            style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem"
+          >
+            <div class="form-group">
+              <label>Validade</label
+              ><input
+                type="text"
+                class="form-input"
+                placeholder="MM/AA"
+                maxlength="5"
+              />
+            </div>
+            <div class="form-group">
+              <label>CVV</label
+              ><input
+                type="password"
+                class="form-input"
+                placeholder="123"
+                maxlength="4"
+              />
+            </div>
+            <div class="form-group">
+              <label>Parcelas</label
+              ><select class="form-input" id="creditInstallments">
+                <option value="1">1x sem juros</option>
+                <option value="2">2x sem juros</option>
+                <option value="3">3x sem juros</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nome no Cartão</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="Como está no cartão"
+            />
+          </div>
+          <div class="form-group">
+            <label>CPF do Titular</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="000.000.000-00"
+            />
+          </div>
+        </div>
 
-<!-- Painel Débito -->
-<div id="paymentPanel_debit" class="payment-panel" style="display:none;">
-    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
-        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
-    </div>
-    <div class="form-group"><label>Nome no Cartão</label><input type="text" class="form-input" placeholder="Como está no cartão"></div>
-</div>
+        <!-- Painel Débito -->
+        <div
+          id="paymentPanel_debit"
+          class="payment-panel"
+          style="display: none"
+        >
+          <div class="form-group">
+            <label>Número do Cartão</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="0000 0000 0000 0000"
+              maxlength="19"
+            />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+            <div class="form-group">
+              <label>Validade</label
+              ><input
+                type="text"
+                class="form-input"
+                placeholder="MM/AA"
+                maxlength="5"
+              />
+            </div>
+            <div class="form-group">
+              <label>CVV</label
+              ><input
+                type="password"
+                class="form-input"
+                placeholder="123"
+                maxlength="4"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nome no Cartão</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="Como está no cartão"
+            />
+          </div>
+        </div>
 
-<!-- Painel Boleto -->
-<div id="paymentPanel_boleto" class="payment-panel" style="display:none;">
-    <div class="payment-info-box">
-        <p><strong>🔗 Boleto Bancário</strong></p>
-        <p style="color:#999;font-size:0.85rem;">Vencimento em 3 dias úteis. O pedido é processado após confirmação do pagamento.</p>
-    </div>
-</div>
+        <!-- Painel Boleto -->
+        <div
+          id="paymentPanel_boleto"
+          class="payment-panel"
+          style="display: none"
+        >
+          <div class="payment-info-box">
+            <p><strong>🔗 Boleto Bancário</strong></p>
+            <p style="color: #999; font-size: 0.85rem">
+              Vencimento em 3 dias úteis. O pedido é processado após confirmação
+              do pagamento.
+            </p>
+          </div>
+        </div>
 
-<!-- Painel Combinar -->
-<div id="paymentPanel_combined" class="payment-panel" style="display:none;">
-    <p style="margin-bottom:1rem;">💡 Divida o pagamento entre <strong>Pix e Cartão de Crédito</strong></p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div class="form-group"><label>Valor no Pix</label><input type="number" class="form-input" id="combinedPixAmount" placeholder="R$ 0,00" step="0.01" oninput="updateCombinedTotal()"></div>
-        <div class="form-group"><label>Valor no Cartão</label><input type="number" class="form-input" id="combinedCardAmount" placeholder="R$ 0,00" readonly style="background:#f5f5f5;"></div>
-    </div>
-    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
-        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
-        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
-        <div class="form-group"><label>Parcelas</label><select class="form-input"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option></select></div>
-    </div>
-    <div class="form-group"><label>Nome no Cartão</label><input type="text" class="form-input" placeholder="Como está no cartão"></div>
-</div>
+        <!-- Painel Combinar -->
+        <div
+          id="paymentPanel_combined"
+          class="payment-panel"
+          style="display: none"
+        >
+          <p style="margin-bottom: 1rem">
+            💡 Divida o pagamento entre <strong>Pix e Cartão de Crédito</strong>
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+            <div class="form-group">
+              <label>Valor no Pix</label
+              ><input
+                type="number"
+                class="form-input"
+                id="combinedPixAmount"
+                placeholder="R$ 0,00"
+                step="0.01"
+                oninput="updateCombinedTotal()"
+              />
+            </div>
+            <div class="form-group">
+              <label>Valor no Cartão</label
+              ><input
+                type="number"
+                class="form-input"
+                id="combinedCardAmount"
+                placeholder="R$ 0,00"
+                readonly
+                style="background: #f5f5f5"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Número do Cartão</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="0000 0000 0000 0000"
+              maxlength="19"
+            />
+          </div>
+          <div
+            style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem"
+          >
+            <div class="form-group">
+              <label>Validade</label
+              ><input
+                type="text"
+                class="form-input"
+                placeholder="MM/AA"
+                maxlength="5"
+              />
+            </div>
+            <div class="form-group">
+              <label>CVV</label
+              ><input
+                type="password"
+                class="form-input"
+                placeholder="123"
+                maxlength="4"
+              />
+            </div>
+            <div class="form-group">
+              <label>Parcelas</label
+              ><select class="form-input">
+                <option value="1">1x</option>
+                <option value="2">2x</option>
+                <option value="3">3x</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nome no Cartão</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="Como está no cartão"
+            />
+          </div>
+        </div>
 
-<!-- Painel 2 Cartões -->
-<div id="paymentPanel_twocards" class="payment-panel" style="display:none;">
-    <p style="margin-bottom:1rem;">💡 Divida o pagamento entre <strong>dois cartões de crédito</strong></p>
-    <h5 style="color:#2d5a27;margin-bottom:0.5rem;">💳 Cartão 1</h5>
-    <div class="form-group"><label>Valor no Cartão 1</label><input type="number" class="form-input" id="card1Amount" placeholder="R$ 0,00" step="0.01" oninput="updateTwoCardsTotal()"></div>
-    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
-        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
-    </div>
-    <h5 style="color:#2d5a27;margin:1rem 0 0.5rem;">💳 Cartão 2</h5>
-    <div class="form-group"><label>Valor no Cartão 2</label><input type="number" class="form-input" id="card2Amount" placeholder="R$ 0,00" readonly style="background:#f5f5f5;"></div>
-    <div class="form-group"><label>Número do Cartão</label><input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div class="form-group"><label>Validade</label><input type="text" class="form-input" placeholder="MM/AA" maxlength="5"></div>
-        <div class="form-group"><label>CVV</label><input type="password" class="form-input" placeholder="123" maxlength="4"></div>
-    </div>
-</div>
+        <!-- Painel 2 Cartões -->
+        <div
+          id="paymentPanel_twocards"
+          class="payment-panel"
+          style="display: none"
+        >
+          <p style="margin-bottom: 1rem">
+            💡 Divida o pagamento entre <strong>dois cartões de crédito</strong>
+          </p>
+          <h5 style="color: #2d5a27; margin-bottom: 0.5rem">💳 Cartão 1</h5>
+          <div class="form-group">
+            <label>Valor no Cartão 1</label
+            ><input
+              type="number"
+              class="form-input"
+              id="card1Amount"
+              placeholder="R$ 0,00"
+              step="0.01"
+              oninput="updateTwoCardsTotal()"
+            />
+          </div>
+          <div class="form-group">
+            <label>Número do Cartão</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="0000 0000 0000 0000"
+              maxlength="19"
+            />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+            <div class="form-group">
+              <label>Validade</label
+              ><input
+                type="text"
+                class="form-input"
+                placeholder="MM/AA"
+                maxlength="5"
+              />
+            </div>
+            <div class="form-group">
+              <label>CVV</label
+              ><input
+                type="password"
+                class="form-input"
+                placeholder="123"
+                maxlength="4"
+              />
+            </div>
+          </div>
+          <h5 style="color: #2d5a27; margin: 1rem 0 0.5rem">💳 Cartão 2</h5>
+          <div class="form-group">
+            <label>Valor no Cartão 2</label
+            ><input
+              type="number"
+              class="form-input"
+              id="card2Amount"
+              placeholder="R$ 0,00"
+              readonly
+              style="background: #f5f5f5"
+            />
+          </div>
+          <div class="form-group">
+            <label>Número do Cartão</label
+            ><input
+              type="text"
+              class="form-input"
+              placeholder="0000 0000 0000 0000"
+              maxlength="19"
+            />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+            <div class="form-group">
+              <label>Validade</label
+              ><input
+                type="text"
+                class="form-input"
+                placeholder="MM/AA"
+                maxlength="5"
+              />
+            </div>
+            <div class="form-group">
+              <label>CVV</label
+              ><input
+                type="password"
+                class="form-input"
+                placeholder="123"
+                maxlength="4"
+              />
+            </div>
+          </div>
+        </div>
 
-<button class="btn btn-primary" id="confirmOrderBtn" onclick="confirmOrder()" style="width:100%;padding:1rem;margin-top:1.5rem;font-size:1.2rem;">✅ Confirmar Pedido</button>
+        <button
+          class="btn btn-primary"
+          id="confirmOrderBtn"
+          onclick="confirmOrder()"
+          style="
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 1.2rem;
+          "
+        >
+          ✅ Confirmar Pedido
+        </button>
       </div>
     </div>
 
