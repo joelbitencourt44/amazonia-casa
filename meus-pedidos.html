@@ -225,26 +225,34 @@
           // Cancelar no Firebase
           if (typeof db !== "undefined") {
             try {
-              await db
-                .collection("orders")
-                .doc(id.toString())
-                .update({
-                  status: "cancelled",
-                  cancelledAt: new Date().toISOString(),
-                  cancelledBy: "cliente",
-                });
-            } catch (e) {}
+              await db.collection("orders").doc(String(id)).update({
+                status: "cancelled",
+                cancelledAt: new Date().toISOString(),
+                cancelledBy: "cliente",
+              });
+              console.log("✅ Firebase atualizado!");
+            } catch (e) {
+              console.log("Firebase offline");
+            }
           }
+
           // Cancelar no localStorage
           var orders = JSON.parse(localStorage.getItem("amazoniaOrders")) || [];
           var order = orders.find(function (o) {
-            return o.id == id || o.orderNumber == id;
+            return (
+              String(o.id) === String(id) ||
+              String(o.orderNumber) === String(id)
+            );
           });
+
           if (order) {
             order.status = "cancelled";
+            order.cancelledAt = new Date().toISOString();
+            order.cancelledBy = "cliente";
             localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
           }
-          alert("✅ Cancelado!");
+
+          alert("✅ Pedido cancelado!");
           location.reload();
         }
       }

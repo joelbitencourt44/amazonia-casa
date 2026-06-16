@@ -899,6 +899,7 @@ function loadSettingsForm() {
     siteData.social?.instagram || "";
   document.getElementById("socialFacebook").value =
     siteData.social?.facebook || "";
+  document.getElementById("socialTiktok").value = siteData.social?.tiktok || "";
 }
 async function saveSettings() {
   var d = {
@@ -913,6 +914,7 @@ async function saveSettings() {
     social: {
       instagram: document.getElementById("socialInstagram").value,
       facebook: document.getElementById("socialFacebook").value,
+      tiktok: document.getElementById("socialTiktok").value,
     },
     updatedAt: new Date().toISOString(),
   };
@@ -1154,50 +1156,6 @@ function openTrackingModal(orderId) {
   document.getElementById("trackingModal").style.display = "flex";
 }
 
-function cancelOrderAdmin(orderId) {
-  console.log("cancelOrderAdmin chamado! ID:", orderId);
-
-  var motivo = prompt("Motivo do cancelamento:");
-  if (!motivo) return;
-
-  var o = orders.find(function (o) {
-    return o.id === orderId || String(o.id) === String(orderId);
-  });
-
-  if (!o) {
-    alert("❌ Pedido não encontrado!");
-    return;
-  }
-
-  // Atualizar o pedido
-  o.status = "cancelled";
-  o.cancelledAt = new Date().toISOString();
-  o.cancelledBy = "admin";
-  o.cancelledReason = motivo;
-
-  // SALVAR NO LOCALSTORAGE (OBRIGATÓRIO)
-  localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
-
-  // Tentar atualizar no Firebase (não bloqueia se falhar)
-  try {
-    db.collection("orders").doc(String(orderId)).update({
-      status: "cancelled",
-      cancelledAt: o.cancelledAt,
-      cancelledBy: "admin",
-      cancelledReason: motivo,
-    });
-  } catch (e) {
-    console.log("Firebase offline, salvo localmente");
-  }
-
-  // RECARREGAR AS TABELAS
-  loadDeliveriesTable();
-  loadOrdersTable();
-  loadDashboard();
-
-  alert("✅ Pedido #" + (o.orderNumber || orderId) + " cancelado!");
-}
-
 function callDeliveryAPI(orderId) {
   var o = orders.find(function (o) {
     return o.id == orderId || String(o.id) === String(orderId);
@@ -1240,34 +1198,43 @@ async function updateOrderStatus(
   newStatus,
 ) {
   var o = orders.find(function (o) {
-    return o.id == orderId || String(o.id) === String(orderId);
+    return String(o.id) === String(orderId);
   });
+
   if (!o) {
     alert("❌ Pedido não encontrado!");
     return;
   }
 
+  // Atualizar o pedido localmente
   o.trackingCode = trackingCode;
   o.trackingLink = trackingLink;
   o.status = newStatus;
   o.statusUpdatedAt = new Date().toISOString();
 
+  // Salvar no localStorage (backup)
+  localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
+
+  // Atualizar no Firebase
   try {
     await db.collection("orders").doc(String(orderId)).update({
       trackingCode: trackingCode,
       trackingLink: trackingLink,
       status: newStatus,
-      statusUpdatedAt: new Date().toISOString(),
+      statusUpdatedAt: o.statusUpdatedAt,
     });
+    console.log("✅ Firebase atualizado!");
   } catch (e) {
-    localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
+    console.log("Firebase offline, salvo apenas localmente");
   }
 
+  // Recarregar as tabelas
   loadDeliveriesTable();
   loadOrdersTable();
   loadDashboard();
   closeTrackingModal();
-  alert("✅ Atualizado!");
+
+  alert("✅ Rastreamento atualizado!");
 }
 
 function loadDeliveryMap() {
@@ -1875,12 +1842,14 @@ document.addEventListener("mousedown", function (e) {
 });
 
 // ============ FUNÇÃO CANCELAR PEDIDO (ADMIN) ============
-function cancelOrderAdmin(orderId) {
+async function cancelOrderAdmin(orderId) {
+  console.log("cancelOrderAdmin chamado! ID:", orderId);
+
   var motivo = prompt("Motivo do cancelamento:");
   if (!motivo) return;
 
   var o = orders.find(function (o) {
-    return o.id === orderId || String(o.id) === String(orderId);
+    return String(o.id) === String(orderId);
   });
 
   if (!o) {
@@ -1888,29 +1857,34 @@ function cancelOrderAdmin(orderId) {
     return;
   }
 
+  // Atualizar o pedido
   o.status = "cancelled";
   o.cancelledAt = new Date().toISOString();
   o.cancelledBy = "admin";
   o.cancelledReason = motivo;
 
+  // Salvar no localStorage
   localStorage.setItem("amazoniaOrders", JSON.stringify(orders));
 
+  // Atualizar no Firebase
   try {
-    db.collection("orders").doc(String(orderId)).update({
+    await db.collection("orders").doc(String(orderId)).update({
       status: "cancelled",
       cancelledAt: o.cancelledAt,
       cancelledBy: "admin",
       cancelledReason: motivo,
     });
+    console.log("✅ Firebase atualizado!");
   } catch (e) {
     console.log("Firebase offline, salvo localmente");
   }
 
+  // Recarregar as tabelas
   loadDeliveriesTable();
   loadOrdersTable();
   loadDashboard();
 
-  alert("✅ Pedido cancelado!");
+  alert("✅ Pedido #" + (o.orderNumber || orderId) + " cancelado!");
 }
 
 // ============ CHATBOT ============
@@ -2170,114 +2144,130 @@ var galleryImages = [];
 
 // Carregar imagens da galeria
 async function loadGallery() {
-    try {
-        var doc = await db.collection("siteConfig").doc("gallery").get();
-        if (doc.exists && doc.data().images) {
-            galleryImages = doc.data().images;
-        } else {
-            galleryImages = [];
-        }
-    } catch(e) {
-        galleryImages = JSON.parse(localStorage.getItem("galleryImages")) || [];
+  try {
+    var doc = await db.collection("siteConfig").doc("gallery").get();
+    if (doc.exists && doc.data().images) {
+      galleryImages = doc.data().images;
+    } else {
+      galleryImages = [];
     }
-    renderGalleryPreview();
+  } catch (e) {
+    galleryImages = JSON.parse(localStorage.getItem("galleryImages")) || [];
+  }
+  renderGalleryPreview();
 }
 
 // Mostrar preview das imagens
 function renderGalleryPreview() {
-    var container = document.getElementById("galleryPreview");
-    if (!container) return;
-    
-    if (galleryImages.length === 0) {
-        container.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;">Nenhuma imagem na galeria</p>';
-        return;
-    }
-    
-    container.innerHTML = galleryImages.map(function(img, index) {
-        return '<div style="position:relative;border:2px solid #ddd;border-radius:10px;overflow:hidden;">' +
-            '<img src="' + img + '" style="width:100%;height:150px;object-fit:cover;">' +
-            '<button onclick="removeGalleryImage(' + index + ')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;width:25px;height:25px;border-radius:50%;cursor:pointer;font-size:0.8rem;">✕</button>' +
-            '</div>';
-    }).join("");
+  var container = document.getElementById("galleryPreview");
+  if (!container) return;
+
+  if (galleryImages.length === 0) {
+    container.innerHTML =
+      '<p style="color:#999;grid-column:1/-1;text-align:center;">Nenhuma imagem na galeria</p>';
+    return;
+  }
+
+  container.innerHTML = galleryImages
+    .map(function (img, index) {
+      return (
+        '<div style="position:relative;border:2px solid #ddd;border-radius:10px;overflow:hidden;">' +
+        '<img src="' +
+        img +
+        '" style="width:100%;height:150px;object-fit:cover;">' +
+        '<button onclick="removeGalleryImage(' +
+        index +
+        ')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;width:25px;height:25px;border-radius:50%;cursor:pointer;font-size:0.8rem;">✕</button>' +
+        "</div>"
+      );
+    })
+    .join("");
 }
 
 // Fazer upload de imagens
 async function uploadGalleryImages() {
-    var input = document.getElementById("galleryImageInput");
-    var files = input.files;
-    
-    if (!files || files.length === 0) {
-        alert("Selecione pelo menos uma imagem!");
-        return;
-    }
-    
-    document.getElementById("uploadStatus").textContent = "⏳ Enviando " + files.length + " imagem(ns)...";
-    
-    for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        
-        // Converter para base64 (máximo 500KB para não estourar)
-        var reader = new FileReader();
-        
-        await new Promise(function(resolve) {
-            reader.onload = function(e) {
-                // Redimensionar imagem para no máximo 800px de largura
-                var img = new Image();
-                img.onload = function() {
-                    var canvas = document.createElement("canvas");
-                    var maxWidth = 800;
-                    var scale = maxWidth / img.width;
-                    canvas.width = maxWidth;
-                    canvas.height = img.height * scale;
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    // Comprimir para JPEG com qualidade 0.7
-                    var compressed = canvas.toDataURL("image/jpeg", 0.7);
-                    galleryImages.push(compressed);
-                    resolve();
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-    
-    // Salvar no Firebase
-    await saveGalleryToFirebase();
-    
-    document.getElementById("uploadStatus").textContent = "✅ " + files.length + " imagem(ns) adicionada(s)!";
-    input.value = "";
-    renderGalleryPreview();
+  var input = document.getElementById("galleryImageInput");
+  var files = input.files;
+
+  if (!files || files.length === 0) {
+    alert("Selecione pelo menos uma imagem!");
+    return;
+  }
+
+  document.getElementById("uploadStatus").textContent =
+    "⏳ Enviando " + files.length + " imagem(ns)...";
+
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+
+    // Converter para base64 (máximo 500KB para não estourar)
+    var reader = new FileReader();
+
+    await new Promise(function (resolve) {
+      reader.onload = function (e) {
+        // Redimensionar imagem para no máximo 800px de largura
+        var img = new Image();
+        img.onload = function () {
+          var canvas = document.createElement("canvas");
+          var maxWidth = 800;
+          var scale = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scale;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Comprimir para JPEG com qualidade 0.7
+          var compressed = canvas.toDataURL("image/jpeg", 0.7);
+          galleryImages.push(compressed);
+          resolve();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Salvar no Firebase
+  await saveGalleryToFirebase();
+
+  document.getElementById("uploadStatus").textContent =
+    "✅ " + files.length + " imagem(ns) adicionada(s)!";
+  input.value = "";
+  renderGalleryPreview();
 }
 
 // Remover imagem da galeria
 function removeGalleryImage(index) {
-    if (confirm("Remover esta imagem da galeria?")) {
-        galleryImages.splice(index, 1);
-        saveGalleryToFirebase();
-        renderGalleryPreview();
-    }
+  if (confirm("Remover esta imagem da galeria?")) {
+    galleryImages.splice(index, 1);
+    saveGalleryToFirebase();
+    renderGalleryPreview();
+  }
 }
 
 // Salvar no Firebase
 async function saveGalleryToFirebase() {
-    try {
-        await db.collection("siteConfig").doc("gallery").set({
-            images: galleryImages,
-            updatedAt: new Date().toISOString()
-        }, { merge: true });
-    } catch(e) {
-        console.log("Firebase offline, salvando localmente");
-    }
-    localStorage.setItem("galleryImages", JSON.stringify(galleryImages));
+  try {
+    await db.collection("siteConfig").doc("gallery").set(
+      {
+        images: galleryImages,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true },
+    );
+  } catch (e) {
+    console.log("Firebase offline, salvando localmente");
+  }
+  localStorage.setItem("galleryImages", JSON.stringify(galleryImages));
 }
 
 // Salvar ordem (placeholder - a ordem já é mantida pelo array)
 function saveGalleryOrder() {
-    saveGalleryToFirebase();
-    alert("✅ Ordem salva!");
+  saveGalleryToFirebase();
+  alert("✅ Ordem salva!");
 }
 
 // Carregar galeria ao abrir a aba
-document.querySelector('a[data-section="gallery"]')?.addEventListener("click", loadGallery);
+document
+  .querySelector('a[data-section="gallery"]')
+  ?.addEventListener("click", loadGallery);

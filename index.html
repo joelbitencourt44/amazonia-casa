@@ -551,6 +551,16 @@
             </p>
             <a
               href="#products"
+              onclick="
+                document.querySelectorAll('.section').forEach(function (s) {
+                  s.style.display = 'none';
+                });
+                document.getElementById('products').style.display = 'block';
+                if (typeof loadAllProducts === 'function') {
+                  loadAllProducts();
+                }
+                return false;
+              "
               style="
                 display: inline-block;
                 margin-top: 1.5rem;
@@ -614,7 +624,7 @@
         class="section contact-section"
         style="display: none"
       >
-        <h2>💬 Deixe seu Feedback</h2>
+        <h2>Deixe seu Feedback</h2>
         <div class="contact-container">
           <div class="contact-info" id="contactInfo">
             <h3>Amazônia em Casa</h3>
@@ -667,6 +677,33 @@
                 "
                 ><i class="fab fa-whatsapp" style="color: white"></i
               ></a>
+              <!-- TikTok -->
+              <a
+                href="https://tiktok.com/@seutiktok"
+                target="_blank"
+                style="
+                  background: #000000;
+                  width: 42px;
+                  height: 42px;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  text-decoration: none;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 448 512"
+                  width="20"
+                  height="20"
+                  fill="white"
+                >
+                  <path
+                    d="M448 209.91a210.06 210.06 0 01-122.77-39.25V349.38A162.55 162.55 0 11185 188.31V278.2a74.62 74.62 0 1052.23 71.18V0h88a121.18 121.18 0 001.86 22.17A122.18 122.18 0 00381 102.39a121.43 121.43 0 0067 20.14z"
+                  />
+                </svg>
+              </a>
             </div>
           </div>
           <form class="contact-form" id="contactForm">

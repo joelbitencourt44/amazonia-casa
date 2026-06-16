@@ -153,43 +153,75 @@ async function loadSiteData() {
 
 function updateSiteContent() {
   if (!siteConfig) return;
+
   document.querySelector(".logo h1").textContent =
     siteConfig.store_name || "Amazônia em Casa";
   document.title = siteConfig.store_name || "Amazônia em Casa";
+
   var ht = document.querySelector(".hero-content h2");
   var hp = document.querySelector(".hero-content p");
   if (ht && siteConfig.hero) ht.textContent = siteConfig.hero.title;
   if (hp && siteConfig.hero) hp.textContent = siteConfig.hero.subtitle;
+
+  // Sobre Nós - com quebras de linha preservadas
   var aboutDiv = document.getElementById("aboutContent");
-  if (aboutDiv && siteConfig.about)
+  if (aboutDiv && siteConfig.about) {
+    var aboutText = (siteConfig.about.content || "").replace(/\n/g, "<br>");
     aboutDiv.innerHTML =
       "<p>" +
-      siteConfig.about.content +
-      "</p><br><p><strong>Missão:</strong> " +
+      aboutText +
+      "</p><br>" +
+      "<p><strong>Missão:</strong> " +
       siteConfig.about.mission +
-      "</p><br><p><strong>Fundador(a):</strong> " +
+      "</p><br>" +
+      "<p><strong>Fundador(a):</strong> " +
       siteConfig.about.founder +
       " | <strong>Desde:</strong> " +
       siteConfig.about.founded +
       "</p>";
+  }
+
+  // Contato - com e-mail, TikTok e observação
   var ci = document.getElementById("contactInfo");
   if (ci)
     ci.innerHTML =
       "<h3>" +
       (siteConfig.store_name || "Amazônia em Casa") +
-      '</h3><p><i class="fas fa-map-marker-alt"></i> ' +
+      "</h3>" +
+      '<p><i class="fas fa-map-marker-alt"></i> ' +
       (siteConfig.address || "") +
-      '</p><p><i class="fas fa-phone"></i> ' +
+      "</p>" +
+      '<p><i class="fas fa-phone"></i> ' +
       (siteConfig.phone || "") +
-      '</p><p><i class="fas fa-clock"></i> ' +
+      "</p>" +
+      '<p><i class="fas fa-envelope"></i> ' +
+      (siteConfig.email || "") +
+      "</p>" +
+      '<p><i class="fas fa-clock"></i> ' +
       (siteConfig.business_hours || "") +
-      '</p><div class="social-links"><a href="' +
+      "</p>" +
+      '<div class="social-links">' +
+      '<a href="' +
       (siteConfig.social?.instagram || "#") +
-      '" target="_blank"><i class="fab fa-instagram"></i></a><a href="' +
+      '" target="_blank"><i class="fab fa-instagram"></i></a>' +
+      '<a href="' +
       (siteConfig.social?.facebook || "#") +
-      '" target="_blank"><i class="fab fa-facebook-f"></i></a><a href="https://wa.me/' +
+      '" target="_blank"><i class="fab fa-facebook-f"></i></a>' +
+      '<a href="' +
+      (siteConfig.social?.tiktok || "#") +
+      '" target="_blank"><i class="fab fa-tiktok"></i></a>' +
+      '<a href="https://wa.me/' +
       (siteConfig.whatsapp || "") +
-      '" target="_blank"><i class="fab fa-whatsapp"></i></a></div>';
+      '" target="_blank"><i class="fab fa-whatsapp"></i></a>' +
+      "</div>" +
+      '<div style="background:#f9f9f9;padding:1rem;border-radius:10px;margin-top:1rem;border-left:4px solid #2d5a27;">' +
+      '<p style="color:#555;font-size:0.9rem;margin:0;">' +
+      "🏪 <strong>Importante:</strong> Nossa loja física funciona como <strong>mostruário</strong> dos produtos. " +
+      "Por ser um espaço aconchegante, as compras são realizadas <strong>preferencialmente online</strong>, " +
+      "garantindo mais comodidade e segurança para você. " +
+      "<br>📦 Todos os pedidos são preparados com carinho e entregues no conforto da sua casa!" +
+      "</p>" +
+      "</div>";
 }
 
 function checkLoggedUser() {
@@ -1023,155 +1055,172 @@ var itemsVisible = 5;
 var galleryInterval = null;
 
 async function loadGalleryFromFirebase() {
-    try {
-        var doc = await db.collection("siteConfig").doc("gallery").get();
-        if (doc.exists && doc.data().images) {
-            galleryImages = doc.data().images;
-        } else {
-            galleryImages = [];
-        }
-    } catch(e) {
-        galleryImages = JSON.parse(localStorage.getItem("galleryImages")) || [];
+  try {
+    var doc = await db.collection("siteConfig").doc("gallery").get();
+    if (doc.exists && doc.data().images) {
+      galleryImages = doc.data().images;
+    } else {
+      galleryImages = [];
     }
-    loadPhotoGallery();
+  } catch (e) {
+    galleryImages = JSON.parse(localStorage.getItem("galleryImages")) || [];
+  }
+  loadPhotoGallery();
 }
 
 function loadPhotoGallery() {
-    if (galleryImages.length === 0) {
-        document.getElementById("photoGallery").style.display = "none";
-        return;
-    }
+  if (galleryImages.length === 0) {
+    document.getElementById("photoGallery").style.display = "none";
+    return;
+  }
 
-    document.getElementById("photoGallery").style.display = "block";
-    
-    // Se tiver menos de 5, mostrar quantas tiver
-    if (galleryImages.length < itemsVisible) {
-        itemsVisible = galleryImages.length;
-    } else {
-        itemsVisible = 5;
+  document.getElementById("photoGallery").style.display = "block";
+
+  // Se tiver menos de 5, mostrar quantas tiver
+  if (galleryImages.length < itemsVisible) {
+    itemsVisible = galleryImages.length;
+  } else {
+    itemsVisible = 5;
+  }
+
+  // Criar array duplicado para loop infinito
+  var loopImages = galleryImages.concat(galleryImages).concat(galleryImages);
+
+  var track = document.getElementById("galleryTrack");
+  if (!track) return;
+
+  var imgWidth = 100 / itemsVisible;
+
+  track.innerHTML = loopImages
+    .map(function (img) {
+      return (
+        '<div style="min-width:' +
+        imgWidth +
+        '%;flex-shrink:0;cursor:pointer;" onclick="openImageModal(\'' +
+        img +
+        "')\">" +
+        '<img src="' +
+        img +
+        '" style="width:100%;height:220px;object-fit:cover;border-radius:10px;">' +
+        "</div>"
+      );
+    })
+    .join("");
+
+  // Começar do meio
+  currentSlide = galleryImages.length;
+  updateGalleryPosition(false);
+
+  // Criar bolinhas
+  var dotsContainer = document.getElementById("galleryDots");
+  if (dotsContainer) {
+    var totalPages = Math.ceil(galleryImages.length / 1); // 1 por clique
+    dotsContainer.innerHTML = "";
+    for (var i = 0; i < galleryImages.length; i++) {
+      var dot = document.createElement("span");
+      dot.style.cssText =
+        "display:inline-block;width:8px;height:8px;border-radius:50%;background:#ccc;margin:0 3px;transition:all 0.3s;cursor:pointer;";
+      dot.onclick = (function (index) {
+        return function () {
+          currentSlide = index + galleryImages.length;
+          updateGalleryPosition(true);
+          startGalleryAutoPlay();
+        };
+      })(i);
+      dotsContainer.appendChild(dot);
     }
-    
-    // Criar array duplicado para loop infinito
-    var loopImages = galleryImages.concat(galleryImages).concat(galleryImages);
-    
-    var track = document.getElementById("galleryTrack");
-    if (!track) return;
-    
-    var imgWidth = (100 / itemsVisible);
-    
-    track.innerHTML = loopImages.map(function(img) {
-        return '<div style="min-width:' + imgWidth + '%;flex-shrink:0;cursor:pointer;" onclick="openImageModal(\'' + img + '\')">' +
-            '<img src="' + img + '" style="width:100%;height:220px;object-fit:cover;border-radius:10px;">' +
-            '</div>';
-    }).join("");
-    
-    // Começar do meio
-    currentSlide = galleryImages.length;
-    updateGalleryPosition(false);
-    
-    // Criar bolinhas
-    var dotsContainer = document.getElementById("galleryDots");
-    if (dotsContainer) {
-        var totalPages = Math.ceil(galleryImages.length / 1); // 1 por clique
-        dotsContainer.innerHTML = "";
-        for (var i = 0; i < galleryImages.length; i++) {
-            var dot = document.createElement("span");
-            dot.style.cssText = "display:inline-block;width:8px;height:8px;border-radius:50%;background:#ccc;margin:0 3px;transition:all 0.3s;cursor:pointer;";
-            dot.onclick = (function(index) {
-                return function() {
-                    currentSlide = index + galleryImages.length;
-                    updateGalleryPosition(true);
-                    startGalleryAutoPlay();
-                };
-            })(i);
-            dotsContainer.appendChild(dot);
-        }
-    }
-    
-    updateGalleryCounter();
-    startGalleryAutoPlay();
+  }
+
+  updateGalleryCounter();
+  startGalleryAutoPlay();
 }
 
 function updateGalleryPosition(animate) {
-    var track = document.getElementById("galleryTrack");
-    if (!track) return;
-    
-    var imgWidth = (100 / itemsVisible);
-    
-    if (!animate) {
-        track.style.transition = "none";
-    } else {
-        track.style.transition = "transform 0.6s ease-in-out";
-    }
-    
-    track.style.transform = "translateX(-" + (currentSlide * imgWidth) + "%)";
-    
-    // Atualizar bolinhas
-    var dots = document.querySelectorAll("#galleryDots span");
-    var realIndex = currentSlide % galleryImages.length;
-    dots.forEach(function(dot, i) {
-        dot.style.background = (i === realIndex) ? "#2d5a27" : "#ccc";
-        dot.style.transform = (i === realIndex) ? "scale(1.3)" : "scale(1)";
-    });
-    
-    updateGalleryCounter();
-    
-    // Loop infinito: resetar posição sem animação
-    if (currentSlide >= galleryImages.length * 2) {
-        setTimeout(function() {
-            currentSlide = galleryImages.length;
-            track.style.transition = "none";
-            track.style.transform = "translateX(-" + (currentSlide * imgWidth) + "%)";
-        }, 600);
-    }
-    if (currentSlide < 0) {
-        setTimeout(function() {
-            currentSlide = galleryImages.length * 2 - 1;
-            track.style.transition = "none";
-            track.style.transform = "translateX(-" + (currentSlide * imgWidth) + "%)";
-        }, 600);
-    }
+  var track = document.getElementById("galleryTrack");
+  if (!track) return;
+
+  var imgWidth = 100 / itemsVisible;
+
+  if (!animate) {
+    track.style.transition = "none";
+  } else {
+    track.style.transition = "transform 0.6s ease-in-out";
+  }
+
+  track.style.transform = "translateX(-" + currentSlide * imgWidth + "%)";
+
+  // Atualizar bolinhas
+  var dots = document.querySelectorAll("#galleryDots span");
+  var realIndex = currentSlide % galleryImages.length;
+  dots.forEach(function (dot, i) {
+    dot.style.background = i === realIndex ? "#2d5a27" : "#ccc";
+    dot.style.transform = i === realIndex ? "scale(1.3)" : "scale(1)";
+  });
+
+  updateGalleryCounter();
+
+  // Loop infinito: resetar posição sem animação
+  if (currentSlide >= galleryImages.length * 2) {
+    setTimeout(function () {
+      currentSlide = galleryImages.length;
+      track.style.transition = "none";
+      track.style.transform = "translateX(-" + currentSlide * imgWidth + "%)";
+    }, 600);
+  }
+  if (currentSlide < 0) {
+    setTimeout(function () {
+      currentSlide = galleryImages.length * 2 - 1;
+      track.style.transition = "none";
+      track.style.transform = "translateX(-" + currentSlide * imgWidth + "%)";
+    }, 600);
+  }
 }
 
 function nextGallerySlide() {
-    currentSlide++;
-    updateGalleryPosition(true);
-    startGalleryAutoPlay();
+  currentSlide++;
+  updateGalleryPosition(true);
+  startGalleryAutoPlay();
 }
 
 function prevGallerySlide() {
-    currentSlide--;
-    updateGalleryPosition(true);
-    startGalleryAutoPlay();
+  currentSlide--;
+  updateGalleryPosition(true);
+  startGalleryAutoPlay();
 }
 
 function startGalleryAutoPlay() {
-    if (galleryInterval) clearInterval(galleryInterval);
-    if (galleryImages.length > 1) {
-        galleryInterval = setInterval(function() {
-            nextGallerySlide();
-        }, 3500);
-    }
+  if (galleryInterval) clearInterval(galleryInterval);
+  if (galleryImages.length > 1) {
+    galleryInterval = setInterval(function () {
+      nextGallerySlide();
+    }, 3500);
+  }
 }
 
 function updateGalleryCounter() {
-    var realIndex = (currentSlide % galleryImages.length) + 1;
-    var counter = document.getElementById("galleryCounter");
-    if (counter) counter.textContent = realIndex + " / " + galleryImages.length;
+  var realIndex = (currentSlide % galleryImages.length) + 1;
+  var counter = document.getElementById("galleryCounter");
+  if (counter) counter.textContent = realIndex + " / " + galleryImages.length;
 }
 
 function openImageModal(img) {
-    var modal = document.createElement("div");
-    modal.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;";
-    modal.innerHTML = '<img src="' + img + '" style="max-width:95%;max-height:95%;border-radius:10px;">' +
-        '<button onclick="this.parentElement.remove()" style="position:absolute;top:20px;right:20px;background:white;border:none;width:40px;height:40px;border-radius:50%;font-size:1.5rem;cursor:pointer;">&times;</button>';
-    modal.addEventListener("click", function(e) { if (e.target === modal) modal.remove(); });
-    document.body.appendChild(modal);
+  var modal = document.createElement("div");
+  modal.style.cssText =
+    "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;";
+  modal.innerHTML =
+    '<img src="' +
+    img +
+    '" style="max-width:95%;max-height:95%;border-radius:10px;">' +
+    '<button onclick="this.parentElement.remove()" style="position:absolute;top:20px;right:20px;background:white;border:none;width:40px;height:40px;border-radius:50%;font-size:1.5rem;cursor:pointer;">&times;</button>';
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) modal.remove();
+  });
+  document.body.appendChild(modal);
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
-    await loadGalleryFromFirebase();
-    await loadFeaturedFeedbacks();
+  await loadGalleryFromFirebase();
+  await loadFeaturedFeedbacks();
 });
 
 // ============ FEEDBACKS DESTACADOS ============
