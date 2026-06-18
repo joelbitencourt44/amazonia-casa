@@ -993,11 +993,12 @@ function previewImage(event) {
 
 // ============ ENTREGAS ============
 var DELIVERY_API = {
-  provider: "custom",
-  apiKey: "SUA_CHAVE_API_AQUI",
-  apiUrl: "https://api.exemplo.com/v1/",
+  provider: "ifood",
+  apiKey: CONFIG.IFOOD_CLIENT_ID,
+  apiSecret: CONFIG.IFOOD_CLIENT_SECRET,
+  apiUrl: "https://merchant-api.ifood.com.br/",
   mapProvider: "google",
-  mapApiKey: "AIzaSyCIzYgRuTo94sm2-we2aYBk3On9vCIj6ug",
+  mapApiKey: CONFIG.GOOGLE_MAPS_API_KEY,
 };
 
 function loadDeliveriesTable() {
